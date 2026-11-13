@@ -348,7 +348,7 @@ async function sendCommunityMessage(event){
   const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
   const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
   try{
-    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,sender_code,content,created_at').single();
+    let image_path=null;if(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';image_path='community/'+currentUser.id+'/'+crypto.randomUUID()+'.'+ext;const up=await supabase.storage.from('thunder-chat-images').upload(image_path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error}const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content,image_path}).select('id,user_id,sender_name,sender_code,content,image_path,created_at').single();
     if(error)throw error;addCommunityMessage(data);input.value='';$('communityImageInput').value='';
   }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
   finally{btn.disabled=false;btn.textContent='إرسال'}

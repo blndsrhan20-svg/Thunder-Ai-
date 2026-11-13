@@ -117,6 +117,8 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #authActions{display:flex;gap:8px;margin-top:16px}#authActions button{flex:1}
 #authMsg{font-size:13px;color:var(--ac);min-height:22px;margin-top:10px;line-height:1.6}
 #logout{color:var(--mu)}
+
+#communityView{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--bg)}#communityView[hidden]{display:none}.community-head{padding:18px;border-bottom:1px solid var(--line);background:var(--panel)}.community-head h2{font-size:21px;margin-bottom:4px}.community-head p,#communityStatus{color:var(--mu);font-size:13px}#communityStatus{margin-top:8px}#communityFeed{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.community-empty{margin:auto;text-align:center;color:var(--mu);line-height:1.9;padding:24px}.community-msg{max-width:min(760px,100%);width:100%;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.community-msg.mine{border-color:#f2c23066}.community-meta{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:12px;margin-bottom:6px}.community-meta strong{color:var(--ac);font-size:14px}.community-content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:15px}.community-actions{display:flex;gap:8px;margin-top:7px}.community-actions button{font-size:11px;color:var(--mu);padding:3px 7px;border-radius:6px}#communityComposer{display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel)}#communityInput{flex:1;min-width:0;max-height:130px;resize:none;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px;line-height:1.6}#communitySend{background:var(--ac);color:var(--acx);font-weight:700;border-radius:11px;padding:11px 16px;min-height:44px}#communityOpen{white-space:nowrap}@media(max-width:760px){#communityOpen{font-size:11px;padding:7px 8px}.community-head{padding:14px}.community-msg{padding:10px 12px}#communityFeed{padding:12px}}
 </style>
 </head>
 <body>
@@ -128,13 +130,18 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <div class="foot"><button id="set">الإعدادات العامة</button><button id="logout">تسجيل الخروج</button></div>
 </aside>
 <section id="main">
-  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="communityOpen" class="toolchip">مجتمع ثاندر</button><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
     <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option></select></div>
     <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><button id="micBtn" class="toolchip">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
+  <section id="communityView" hidden aria-label="مجتمع ثاندر">
+    <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div id="communityStatus">الدردشة العامة</div></div>
+    <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
+    <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
+  </section>
 </section>
 
 <dialog id="dlg">
@@ -184,6 +191,7 @@ let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cf
 let cur = null, busy = false, ctrl = null;
 let userMemory = "";
 let pendingImage=null,pendingAudio=null,mediaRecorder=null,audioChunks=[],profileAvatar="";
+let communityChannel=null, communityMessages=[];
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
@@ -268,10 +276,73 @@ async function initAuth(){
   $('authGate').style.display = 'flex';
   supabase.auth.onAuthStateChange((event) => {
     if(event === 'SIGNED_OUT'){
+      if(communityChannel){supabase.removeChannel(communityChannel);communityChannel=null;}
+      communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;
       currentUser=null; currentSession=null; chats=[]; cur=null;
       render(); $('authGate').style.display='flex';
     }
   });
+}
+
+
+function communityTime(value){try{return new Date(value).toLocaleString('ar-IQ',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}catch{return ''}}
+function renderCommunity(){
+  const feed=$('communityFeed');feed.innerHTML='';
+  if(!communityMessages.length){const empty=document.createElement('div');empty.className='community-empty';empty.textContent='ماكو رسائل لحد الآن. كن أول شخص يشارك في مجتمع ثاندر!';feed.appendChild(empty);return}
+  communityMessages.forEach(m=>{
+    const card=document.createElement('article');card.className='community-msg'+(m.user_id===currentUser?.id?' mine':'');
+    const meta=document.createElement('div');meta.className='community-meta';
+    const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';
+    const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(name,time);card.appendChild(meta);
+    const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body);
+    const actions=document.createElement('div');actions.className='community-actions';
+    if(m.user_id===currentUser?.id){const del=document.createElement('button');del.type='button';del.textContent='حذف رسالتي';del.onclick=()=>deleteCommunityMessage(m.id);actions.appendChild(del)}
+    else{const report=document.createElement('button');report.type='button';report.textContent='إبلاغ';report.onclick=()=>reportCommunityMessage(m.id);actions.appendChild(report)}
+    card.appendChild(actions);feed.appendChild(card);
+  });
+  feed.scrollTop=feed.scrollHeight;
+}
+function addCommunityMessage(m){if(!m?.id||communityMessages.some(x=>x.id===m.id))return;communityMessages.push(m);communityMessages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));if(communityMessages.length>100)communityMessages=communityMessages.slice(-100);renderCommunity()}
+async function loadCommunity(){
+  $('communityStatus').textContent='جارٍ الاتصال بالدردشة…';
+  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,content,created_at').order('created_at',{ascending:true}).limit(60);
+  if(error)throw error;communityMessages=data||[];renderCommunity();
+  if(communityChannel)await supabase.removeChannel(communityChannel);
+  communityChannel=supabase.channel('thunder-community-public')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'community_messages'},p=>addCommunityMessage(p.new))
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'community_messages'},p=>{communityMessages=communityMessages.filter(m=>m.id!==p.old.id);renderCommunity()})
+    .subscribe(status=>{$('communityStatus').textContent=status==='SUBSCRIBED'?'متصل الآن · الرسائل تتحدث مباشرة':status==='CHANNEL_ERROR'?'تعذر الاتصال المباشر؛ أعد فتح المجتمع':'جارٍ الاتصال بالدردشة…'});
+}
+async function openCommunity(){
+  if(!currentUser){$('authGate').style.display='flex';return}
+  $('moreMenu').hidden=true;$('msgs').hidden=true;$('bar').hidden=true;$('communityView').hidden=false;$('title').textContent='مجتمع ثاندر';
+  try{await loadCommunity()}catch(e){$('communityStatus').textContent='تعذر تحميل الدردشة: '+e.message}
+}
+async function closeCommunity(){
+  if(communityChannel){await supabase.removeChannel(communityChannel);communityChannel=null}
+  communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;$('title').textContent=getCur()?.title||'Thunder Ai';
+}
+async function sendCommunityMessage(event){
+  event.preventDefault();if(!currentUser)return;
+  const input=$('communityInput'),content=input.value.trim();if(!content)return;
+  if(content.length>1000){alert('الحد الأقصى 1000 حرف');return}
+  const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
+  const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
+  try{
+    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,content,created_at').single();
+    if(error)throw error;addCommunityMessage(data);input.value='';
+  }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
+  finally{btn.disabled=false;btn.textContent='إرسال'}
+}
+async function deleteCommunityMessage(id){
+  if(!confirm('تحذف رسالتك من المجتمع؟'))return;
+  const {error}=await supabase.from('community_messages').delete().eq('id',id);
+  if(error)alert('تعذر حذف الرسالة: '+error.message);else{communityMessages=communityMessages.filter(m=>m.id!==id);renderCommunity()}
+}
+async function reportCommunityMessage(id){
+  const reason=prompt('اكتب سبب الإبلاغ (3 إلى 300 حرف):');if(!reason||reason.trim().length<3)return;
+  const {error}=await supabase.from('community_reports').insert({message_id:id,reporter_id:currentUser.id,reason:reason.trim().slice(0,300)});
+  if(error)alert(error.code==='23505'?'سبق وأبلغت عن هذه الرسالة.':'تعذر إرسال الإبلاغ: '+error.message);else alert('وصل الإبلاغ. شكراً لمساعدتنا في الحفاظ على مجتمع آمن.')
 }
 
 function memoryKey(){ return 'thunder_memory_' + (currentUser?.id || 'guest') }
@@ -455,6 +526,12 @@ async function run(){
 
 function autosize(){ const t = $('in'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px' }
 
+$('communityOpen').onclick=()=>openCommunity();
+$('communityBack').onclick=()=>closeCommunity();
+$('communityComposer').addEventListener('submit',sendCommunityMessage);
+$('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});
+$('communityInput').addEventListener('input',()=>{$('communityInput').style.height='auto';$('communityInput').style.height=Math.min($('communityInput').scrollHeight,130)+'px'});
+$('title').addEventListener('click',()=>{if(!$('communityView').hidden)closeCommunity()});
 $('in').addEventListener('input', autosize);
 $('in').addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send() } });
 $('send').onclick = send;

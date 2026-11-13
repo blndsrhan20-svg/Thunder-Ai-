@@ -110,8 +110,8 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "Connection": "keep-alive", "X-Accel-Buffering": "no" },
     });
   } catch (_error) {
-    return new Response(JSON.stringify({ error: "Invalid request" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "AI provider temporarily unavailable. Please retry." }), {
+      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

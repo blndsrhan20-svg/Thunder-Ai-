@@ -131,7 +131,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 .member-result-name{font-weight:700;overflow-wrap:anywhere}
 .member-result-handle{font-size:12px;color:var(--mu);direction:ltr;text-align:right}
 .member-result button{border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12px}
-</style>
+#dmView{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--bg)}#dmView[hidden]{display:none}.dm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--panel);border-bottom:1px solid var(--line)}.dm-layout{display:grid;grid-template-columns:minmax(220px,310px) 1fr;flex:1;min-height:0}#dmContacts{overflow:auto;border-inline-end:1px solid var(--line);padding:10px}.dm-contact{display:flex;align-items:center;gap:10px;width:100%;text-align:start;padding:12px;border-radius:13px}.dm-contact:hover,.dm-contact.active{background:var(--panel2)}.dm-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f2c230,#a96b11);color:#17120a;font-weight:800;flex-shrink:0}.dm-contact-info{min-width:0;flex:1}.dm-contact-info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dm-contact-info small{color:var(--mu)}#dmThread{display:flex;flex-direction:column;min-width:0;min-height:0}#dmThreadHead{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700}#dmMessages{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:10px}.dm-bubble{max-width:min(76%,520px);align-self:flex-start;background:var(--panel);border:1px solid var(--line);padding:10px 13px;border-radius:18px 18px 18px 5px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}.dm-bubble.mine{align-self:flex-end;background:#3b321c;border-color:#80651d;border-radius:18px 18px 5px 18px}.dm-bubble img{display:block;max-width:100%;max-height:330px;border-radius:12px;margin-top:6px}.dm-time{font-size:10px;color:var(--mu);margin-top:4px}#dmComposer{display:flex;gap:8px;align-items:flex-end;padding:12px;background:var(--panel);border-top:1px solid var(--line)}#dmInput{flex:1;min-width:0;max-height:120px;resize:vertical;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:11px}#dmSend{background:var(--ac);color:var(--acx);border-radius:12px;padding:11px 16px;font-weight:700}#dmImageBtn{border:1px solid var(--line);border-radius:12px;padding:10px}@media(max-width:700px){.dm-layout{grid-template-columns:1fr}#dmContacts{max-height:34%;border-inline-end:0;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;gap:6px}.dm-contact{min-width:175px}.dm-bubble{max-width:88%}.dm-head{padding:12px}}</style>
 </head>
 <body>
 <aside id="side">
@@ -142,17 +142,17 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <div class="foot"><button id="set">الإعدادات العامة</button><button id="logout">تسجيل الخروج</button></div>
 </aside>
 <section id="main">
-  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="communityOpen" class="toolchip">مجتمع ثاندر</button><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="dmOpen" class="toolchip">الرسائل</button><button id="communityOpen" class="toolchip">المجتمع</button><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
     <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option></select></div>
-    <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><button id="micBtn" class="toolchip">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
+    <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
-  <section id="communityView" hidden aria-label="مجتمع ثاندر">
+<section id="dmView" hidden aria-label="الرسائل الخاصة"><div class="dm-head"><div><b>الرسائل</b><div class="hint">محادثات خاصة · رسائل وصور فقط</div></div><button id="dmBack" class="toolchip" type="button">رجوع</button></div><div class="dm-layout"><div id="dmContacts"><div class="community-empty">ابحث عن عضو لبدء محادثة</div></div><div id="dmThread"><div id="dmThreadHead">اختر محادثة للبدء</div><div id="dmMessages"><div class="community-empty">رسائلك الخاصة تظهر هنا</div></div><form id="dmComposer"><button id="dmImageBtn" type="button">＋ صورة</button><input id="dmImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><textarea id="dmInput" rows="1" maxlength="4000" placeholder="اكتب رسالة..." disabled></textarea><button id="dmSend" type="submit" disabled>إرسال</button></form></div></div></section>\n  <section id="communityView" hidden aria-label="مجتمع ثاندر">
     <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div class="community-member-search"><button id="communityFindMember" type="button">⌕ البحث عن عضو</button><span id="myCommunityCode" class="member-code"></span></div><div id="communityStatus">الدردشة العامة</div></div>
     <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
-    <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
+    <form id="communityComposer"><button id="communityImageBtn" type="button" class="toolchip">＋ صورة</button><input id="communityImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة أو أرفق صورة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
   </section>
 </section>
 
@@ -203,7 +203,7 @@ const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
 let cur = null, busy = false, ctrl = null;
 let userMemory = "";
-let pendingImage=null,pendingAudio=null,mediaRecorder=null,audioChunks=[],profileAvatar="";
+let pendingImage=null,profileAvatar="";
 let communityChannel=null, communityMessages=[];
 
 const SUG = [
@@ -238,7 +238,7 @@ function persistChat(c){
       title: c.title,
       msgs: c.msgs.map(m => {
         if(!m.id) m.id = crypto.randomUUID();
-        return {id:m.id, r:m.r, c:m.c, image:m.image||null, audio:m.audio||null, mime:m.mime||null};
+        return {id:m.id, r:m.r, c:m.c, image:m.image||null};
       })
     };
     const {error: ce} = await supabase.from('conversations').upsert({
@@ -247,7 +247,7 @@ function persistChat(c){
     if(ce) throw ce;
 
     const rows = snapshot.msgs.map(m => ({
-      id:m.id, conversation_id:snapshot.id, user_id:ownerId, role:m.r, content:(m.image||m.audio)?JSON.stringify({__thunder_media__:1,text:m.c,image:m.image||null,audio:m.audio||null,mime:m.mime||null}):m.c
+      id:m.id, conversation_id:snapshot.id, user_id:ownerId, role:m.r, content:m.image?JSON.stringify({__thunder_media__:1,text:m.c,image:m.image||null}):m.c
     }));
     if(rows.length){
       const {error: me} = await supabase.from('messages').upsert(rows, {onConflict:'id'});
@@ -272,7 +272,7 @@ async function loadCloudChats(){
   const ids = (cs || []).map(x => x.id);
   let ms = [];
   if(ids.length){ const {data,error} = await supabase.from('messages').select('id,conversation_id,role,content,created_at').in('conversation_id',ids).order('created_at',{ascending:true}); if(error) throw error; ms = data || []; }
-  chats = (cs || []).map(c => ({id:c.id,title:c.title,msgs:ms.filter(m => m.conversation_id === c.id).map(m => {let z={};try{z=JSON.parse(m.content)}catch{};return z?.__thunder_media__?{id:m.id,r:m.role,c:z.text||'',image:z.image||null,audio:z.audio||null,mime:z.mime||null}:{id:m.id,r:m.role,c:m.content}}),t:new Date(c.updated_at || c.created_at).getTime()}));
+  chats = (cs || []).map(c => ({id:c.id,title:c.title,msgs:ms.filter(m => m.conversation_id === c.id).map(m => {let z={};try{z=JSON.parse(m.content)}catch{};return z?.__thunder_media__?{id:m.id,r:m.role,c:z.text||'',image:z.image||null,}:{id:m.id,r:m.role,c:m.content}}),t:new Date(c.updated_at || c.created_at).getTime()}));
   cur = chats[0]?.id || null;
   store.set('tai_chats', chats); render();
 }
@@ -280,7 +280,9 @@ async function enterAccount(session){
   currentSession = session; currentUser = session.user; loadMemory();
   $('authGate').style.display = 'none';
   const display = currentUser.user_metadata?.display_name || (currentUser.email || 'user').split('@')[0];
-  await supabase.from('profiles').upsert({id:currentUser.id,display_name:display},{onConflict:'id'});
+  const handle=(currentUser.email||'member').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24)||'member';
+  const {data:oldProfile}=await supabase.from('profiles').select('username').eq('id',currentUser.id).maybeSingle();
+  await supabase.from('profiles').upsert({id:currentUser.id,display_name:display,username:oldProfile?.username||handle},{onConflict:'id'});
   const {data:communityProfile}=await supabase.from('profiles').select('user_code').eq('id',currentUser.id).maybeSingle();
   if(communityProfile?.user_code)$('myCommunityCode').textContent='رقمك: '+communityProfile.user_code;
   try{ await loadCloudChats(); }catch(e){ $('authMsg').textContent = 'تعذر تحميل محادثاتك: ' + e.message; }
@@ -311,7 +313,7 @@ function renderCommunity(){
     const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';identity.appendChild(name);
     if(m.sender_code){const code=document.createElement('span');code.className='member-code';code.textContent=m.sender_code;identity.appendChild(code)}
     const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(identity,time);card.appendChild(meta);
-    const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body);
+    if(m.content){const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body)}if(m.image_path){const pic=document.createElement('img');pic.alt='صورة من المجتمع';pic.style.cssText='display:block;max-width:min(560px,100%);max-height:420px;object-fit:contain;border-radius:14px;margin-top:9px';supabase.storage.from('thunder-chat-images').createSignedUrl(m.image_path,3600).then(({data,error})=>{if(!error&&data?.signedUrl)pic.src=data.signedUrl});card.appendChild(pic)}
     const actions=document.createElement('div');actions.className='community-actions';
     if(m.user_id===currentUser?.id){const del=document.createElement('button');del.type='button';del.textContent='حذف رسالتي';del.onclick=()=>deleteCommunityMessage(m.id);actions.appendChild(del)}
     else{const report=document.createElement('button');report.type='button';report.textContent='إبلاغ';report.onclick=()=>reportCommunityMessage(m.id);actions.appendChild(report)}
@@ -322,7 +324,7 @@ function renderCommunity(){
 function addCommunityMessage(m){if(!m?.id||communityMessages.some(x=>x.id===m.id))return;communityMessages.push(m);communityMessages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));if(communityMessages.length>100)communityMessages=communityMessages.slice(-100);renderCommunity()}
 async function loadCommunity(){
   $('communityStatus').textContent='جارٍ الاتصال بالدردشة…';
-  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,sender_code,content,created_at').order('created_at',{ascending:true}).limit(60);
+  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,sender_code,content,image_path,created_at').order('created_at',{ascending:true}).limit(60);
   if(error)throw error;communityMessages=data||[];renderCommunity();
   if(communityChannel)await supabase.removeChannel(communityChannel);
   communityChannel=supabase.channel('thunder-community-public')
@@ -341,13 +343,13 @@ async function closeCommunity(){
 }
 async function sendCommunityMessage(event){
   event.preventDefault();if(!currentUser)return;
-  const input=$('communityInput'),content=input.value.trim();if(!content)return;
+  const input=$('communityInput'),file=$('communityImageInput').files?.[0],content=input.value.trim()||(file?'صورة':'');if(!content&&!file)return;if(file&&(!file.type.startsWith('image/')||file.size>10*1024*1024)){alert('اختر صورة لا يتجاوز حجمها 10MB');return}
   if(content.length>1000){alert('الحد الأقصى 1000 حرف');return}
   const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
   const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
   try{
-    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,sender_code,content,created_at').single();
-    if(error)throw error;addCommunityMessage(data);input.value='';
+    let image_path=null;if(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';image_path='community/'+currentUser.id+'/'+crypto.randomUUID()+'.'+ext;const up=await supabase.storage.from('thunder-chat-images').upload(image_path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error}const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content,image_path}).select('id,user_id,sender_name,sender_code,content,image_path,created_at').single();
+    if(error)throw error;addCommunityMessage(data);input.value='';$('communityImageInput').value='';
   }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
   finally{btn.disabled=false;btn.textContent='إرسال'}
 }
@@ -355,11 +357,11 @@ async function searchCommunityMembers(){
   const term=$('communitySearchInput').value.trim(),results=$('communitySearchResults');
   results.innerHTML='';
   if(!term){$('communitySearchStatus').textContent='اكتب الاسم أو رقم العضو للبحث.';return}
-  if(/^\\d+$/.test(term)&&term.length!==8){$('communitySearchStatus').textContent='رقم العضو يجب أن يتكون من 8 أرقام.';return}
+  if(/^\d+$/.test(term)&&term.length!==8){$('communitySearchStatus').textContent='رقم العضو يجب أن يتكون من 8 أرقام.';return}
   $('communitySearchStatus').textContent='جارٍ البحث…';
   try{
     let data=[];
-    if(/^\\d{8}$/.test(term)){
+    if(/^\d{8}$/.test(term)){
       const result=await supabase.from('profiles').select('id,user_code,display_name,username').eq('user_code',term).limit(10);
       if(result.error)throw result.error;data=result.data||[];
     }else{
@@ -380,9 +382,9 @@ async function searchCommunityMembers(){
       const nm=document.createElement('div');nm.className='member-result-name';nm.textContent=member.display_name||'عضو ثاندر';
       const code=document.createElement('div');code.className='member-result-handle';code.textContent=member.user_code||'';
       info.append(nm,code);row.appendChild(info);
-      const copy=document.createElement('button');copy.type='button';copy.textContent='نسخ الرقم';
-      copy.onclick=async()=>{try{await navigator.clipboard.writeText(member.user_code);copy.textContent='تم النسخ'}catch{copy.textContent=member.user_code}};
-      row.appendChild(copy);results.appendChild(row);
+      const copy=document.createElement('button');copy.type='button';copy.textContent='نسخ الرقم';copy.onclick=async()=>{try{await navigator.clipboard.writeText(member.user_code);copy.textContent='تم النسخ'}catch{copy.textContent=member.user_code}};
+      const chat=document.createElement('button');chat.type='button';chat.textContent='مراسلة';chat.onclick=()=>window.openThunderDM?.(member);
+      row.appendChild(copy);row.appendChild(chat);results.appendChild(row);
     });
   }catch(e){$('communitySearchStatus').textContent='تعذر البحث: '+e.message}
 }
@@ -483,7 +485,7 @@ function bubble(m, i, last){
   const d = document.createElement('div');
   d.className = 'm ' + (m.r === 'user' ? 'u' : 'a');
   const b = document.createElement('div'); b.className = 'bub';
-  if(m.r==='user'){b.textContent=m.c||'';if(m.image){const im=document.createElement('img');im.src=m.image;im.alt='صورة مرفقة';im.style.cssText='display:block;max-width:min(320px,75vw);max-height:260px;border-radius:12px;margin-top:8px';b.appendChild(im)}if(m.audio){const au=document.createElement('div');au.textContent='🎙 تسجيل صوتي مرفق';b.appendChild(au)}}else b.innerHTML=md(m.c);
+  if(m.r==='user'){b.textContent=m.c||'';if(m.image){const im=document.createElement('img');im.src=m.image;im.alt='صورة مرفقة';im.style.cssText='display:block;max-width:min(320px,75vw);max-height:260px;border-radius:12px;margin-top:8px';b.appendChild(im)}}else b.innerHTML=md(m.c);
   d.appendChild(b);
   const a = document.createElement('div'); a.className = 'act';
   a.innerHTML = '<button data-a="copy">نسخ</button>' + (m.r === 'user' ? '<button data-a="edit">تعديل</button>' : (last ? '<button data-a="regen">إعادة التوليد</button>' : ''));
@@ -515,10 +517,10 @@ function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
 
 function send(){
   if(busy){ ctrl?.abort(); return }
-  const v = $('in').value.trim(); if(!v && !pendingImage && !pendingAudio) return;
+  const v = $('in').value.trim(); if(!v && !pendingImage) return;
   if(!cur) newChat();
   const c = getCur();
-  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v, image:pendingImage, audio:pendingAudio?.data||null, mime:pendingAudio?.mime||null}); pendingImage=null; pendingAudio=null; updateAttachmentPreview();
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v, image:pendingImage}); pendingImage=null; updateAttachmentPreview();
   if(c.msgs.length === 1) c.title = v.slice(0, 40);
   $('in').value = ''; autosize(); save(); render(); run();
 }
@@ -536,7 +538,7 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-12).map(m => ({...m,c:(m.c || '').slice(-12000)}));
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:(m.image||m.audio)?[{type:'text',text:m.c||'حلّل المرفق.'},...(m.image?[{type:'image_url',image_url:{url:m.image}}]:[]),...(m.audio?[{type:'audio_url',audio_url:{url:m.audio}}]:[])]:m.c})))
+    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:m.image?[{type:'text',text:m.c||'حلّل المرفق.'},{type:'image_url',image_url:{url:m.image}}]:m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();
@@ -583,7 +585,7 @@ $('communityFindMember').onclick=()=>{$('communitySearchDialog').showModal();$('
 $('communitySearchClose').onclick=()=>$('communitySearchDialog').close();
 $('communitySearchInput').addEventListener('input',searchCommunityMembers);
 $('communityBack').onclick=()=>closeCommunity();
-$('communityComposer').addEventListener('submit',sendCommunityMessage);
+$('communityComposer').addEventListener('submit',sendCommunityMessage);$('communityImageBtn').onclick=()=>$('communityImageInput').click();$('communityImageInput').onchange=()=>{const f=$('communityImageInput').files?.[0];if(f&&(!f.type.startsWith('image/')||f.size>10*1024*1024)){alert('الصورة يجب أن تكون أقل من 10MB');$('communityImageInput').value=''}};
 $('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});
 $('communityInput').addEventListener('input',()=>{$('communityInput').style.height='auto';$('communityInput').style.height=Math.min($('communityInput').scrollHeight,130)+'px'});
 $('title').addEventListener('click',()=>{if(!$('communityView').hidden)closeCommunity()});
@@ -649,14 +651,15 @@ $('resetPassword').onclick=async()=>{const {error}=await supabase.auth.resetPass
 $('securityLogout').onclick=async()=>{await supabase.auth.signOut();$('accountDlg').close()};
 $('avatarInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,256/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);profileAvatar=c.toDataURL('image/jpeg',.72);$('avatarPreview').src=profileAvatar;URL.revokeObjectURL(url)};im.src=url};
 $('profileSave').onclick=async()=>{const name=$('profileName').value.trim();if(!name){alert('اكتب اسماً صحيحاً');return}const {error}=await supabase.from('profiles').upsert({id:currentUser.id,display_name:name},{onConflict:'id'});if(error){alert('تعذر حفظ الاسم: '+error.message);return}const {error:ue}=await supabase.auth.updateUser({data:{display_name:name}});if(ue){alert('تعذر تحديث الاسم: '+ue.message);return}try{localStorage.setItem('thunder_avatar_'+currentUser.id,profileAvatar)}catch{}$('accountDlg').close()};
-function updateAttachmentPreview(){const p=$('attachmentPreview');p.innerHTML='';p.hidden=!(pendingImage||pendingAudio);if(pendingImage){const im=document.createElement('img');im.src=pendingImage;p.appendChild(im)}if(pendingAudio){const t=document.createElement('span');t.textContent='تسجيل صوتي جاهز';p.appendChild(t)}if(!p.hidden){const x=document.createElement('button');x.textContent='إزالة';x.onclick=()=>{pendingImage=null;pendingAudio=null;updateAttachmentPreview()};p.appendChild(x)}}
+function updateAttachmentPreview(){const p=$('attachmentPreview');p.innerHTML='';p.hidden=!pendingImage;if(pendingImage){const im=document.createElement('img');im.src=pendingImage;p.appendChild(im)}if(!p.hidden){const x=document.createElement('button');x.textContent='إزالة';x.onclick=()=>{pendingImage=null;updateAttachmentPreview()};p.appendChild(x)}}
 $('attachBtn').onclick=()=>$('imageInput').click();
 $('imageInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>12*1024*1024){alert('الصورة أكبر من 12MB');return}const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);pendingImage=c.toDataURL('image/jpeg',.75);URL.revokeObjectURL(url);updateAttachmentPreview()};im.src=url;e.target.value=''};
-$('micBtn').onclick=async()=>{if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('micBtn').textContent='🎙';return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true}),mt=MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':(MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'');mediaRecorder=new MediaRecorder(stream,mt?{mimeType:mt}:undefined);audioChunks=[];mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};mediaRecorder.onstop=async()=>{const blob=new Blob(audioChunks,{type:(mediaRecorder.mimeType||'audio/webm').split(';')[0]});stream.getTracks().forEach(t=>t.stop());if(blob.size>5*1024*1024){alert('التسجيل تجاوز 5MB');return}const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(blob)});pendingAudio={data,mime:blob.type};updateAttachmentPreview()};mediaRecorder.start();$('micBtn').textContent='■ إيقاف'}catch(e){alert('اسمح للمتصفح باستخدام الميكروفون ثم حاول مجدداً')}};
-
+window.thunderSupabase=supabase;window.thunderCurrentUser=()=>currentUser;
 applyTheme();
 render();
 initAuth();
+
 </script>
+<script type="module" src="./dm.js"></script>
 </body>
 </html>

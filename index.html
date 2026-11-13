@@ -505,7 +505,7 @@ $('authForm').addEventListener('submit', async e => {
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
 
 $('moreBtn').onclick=()=>{$('moreMenu').hidden=!$('moreMenu').hidden};
-function openSettingsV2(){$('moreMenu').hidden=true;$('side').classList.remove('open');$('languageV2').value=cfg.language||'auto';$('themeV2').value=cfg.theme||'dark';$('tempV2').value=cfg.temp;$('sysV2').value=cfg.sys;$('modeMount').appendChild($('mode'));$('mode').style.display='block';$('mode').style.width='100%';$('mode').style.padding='9px';$('mode').style.background='var(--panel2)';$('settingsV2').showModal()}
+function openSettingsV2(){$('moreMenu').hidden=true;$('side').classList.remove('open');$('mode').value=cfg.mode||'normal';$('languageV2').value=cfg.language||'auto';$('themeV2').value=cfg.theme||'dark';$('tempV2').value=cfg.temp;$('sysV2').value=cfg.sys;$('modeMount').appendChild($('mode'));$('mode').style.display='block';$('mode').style.width='100%';$('mode').style.padding='9px';$('mode').style.background='var(--panel2)';$('settingsV2').showModal()}
 $('set').onclick=$('menuSettings').onclick=openSettingsV2;
 $('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
 $('menuPlans').onclick=()=>{$('moreMenu').hidden=true;$('plansDlg').showModal()};

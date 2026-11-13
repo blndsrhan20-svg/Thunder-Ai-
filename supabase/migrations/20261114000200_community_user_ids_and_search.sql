@@ -5,6 +5,8 @@ create sequence if not exists public.community_user_code_seq
 alter table public.profiles
   add column if not exists user_code text;
 
+grant usage, select on sequence public.community_user_code_seq to authenticated;
+
 select setval(
   'public.community_user_code_seq',
   coalesce((select max(user_code::bigint) from public.profiles where user_code ~ '^[0-9]{8}$'), 9999999) + 1,
@@ -83,6 +85,3 @@ set sender_code = p.user_code,
 from public.profiles p
 where p.id = m.user_id
   and m.sender_code is null;
-
-create index if not exists profiles_display_name_search_idx
-  on public.profiles using gin (to_tsvector('simple', coalesce(display_name, '')));

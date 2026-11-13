@@ -217,7 +217,7 @@ function persistChat(c){
       title: c.title,
       msgs: c.msgs.map(m => {
         if(!m.id) m.id = crypto.randomUUID();
-        return {id:m.id, r:m.r, c:m.c};
+        return {id:m.id, r:m.r, c:m.c, image:m.image||null, audio:m.audio||null, mime:m.mime||null};
       })
     };
     const {error: ce} = await supabase.from('conversations').upsert({
@@ -522,7 +522,7 @@ $('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
 $('menuPlans').onclick=()=>{$('moreMenu').hidden=true;$('plansDlg').showModal()};
 $('saveSettingsV2').onclick=()=>{cfg.language=$('languageV2').value;cfg.theme=$('themeV2').value;cfg.temp=Math.max(0,Math.min(2,Number($('tempV2').value)||.7));cfg.sys=$('sysV2').value.trim()||DEF_SYS;cfg.mode=$('mode').value;saveCfg();applyTheme();$('settingsV2').close()};
 $('closeSettingsV2').onclick=()=>$('settingsV2').close();$('plansClose').onclick=()=>$('plansDlg').close();$('accountClose').onclick=()=>$('accountDlg').close();
-function openAccountV2(){const name=currentUser?.user_metadata?.display_name||(currentUser?.email||'').split('@')[0];$('profileName').value=name;$('accountIdentity').innerHTML=esc(currentUser?.email||'')+((currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com'?' <span class="devTag">المطور</span> <span class="verified">✓ موثّق</span>':'');try{profileAvatar=localStorage.getItem('thunder_avatar_'+currentUser.id)||''}catch{}$('avatarPreview').src=profileAvatar;$('accountDlg').showModal()}
+function openAccountV2(){const name=currentUser?.user_metadata?.display_name||(currentUser?.email||'').split('@')[0];$('profileName').value=name;$('accountIdentity').innerHTML=esc(name)+' · '+esc(currentUser?.email||'')+((currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com'?' <span class="devTag">المطور</span> <span class="verified">✓ موثّق</span>':'');try{profileAvatar=localStorage.getItem('thunder_avatar_'+currentUser.id)||''}catch{}$('avatarPreview').src=profileAvatar;$('accountDlg').showModal()}
 $('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
 $('avatarInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,256/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);profileAvatar=c.toDataURL('image/jpeg',.72);$('avatarPreview').src=profileAvatar;URL.revokeObjectURL(url)};im.src=url};
 $('profileSave').onclick=async()=>{const name=$('profileName').value.trim();if(!name){alert('اكتب اسماً صحيحاً');return}const {error}=await supabase.from('profiles').upsert({id:currentUser.id,display_name:name},{onConflict:'id'});if(error){alert('تعذر حفظ الاسم: '+error.message);return}const {error:ue}=await supabase.auth.updateUser({data:{display_name:name}});if(ue){alert('تعذر تحديث الاسم: '+ue.message);return}try{localStorage.setItem('thunder_avatar_'+currentUser.id,profileAvatar)}catch{}$('accountDlg').close()};

@@ -86,111 +86,23 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #authActions{display:flex;gap:8px;margin-top:16px}#authActions button{flex:1}
 #authMsg{font-size:13px;color:var(--ac);min-height:22px;margin-top:10px;line-height:1.6}
 #logout{color:var(--mu)}
-
-/* Thunder AI premium refresh */
-:root{--bg:#090d14;--panel:#101722;--panel2:#182231;--line:#253244;--tx:#f2f5fa;--mu:#9aa8ba;--ac:#f5c542;--acx:#171100;--user:#1c2b3d;--code:#080c12}
-:root[data-theme=light]{--bg:#f3f6fb;--panel:#fff;--panel2:#edf2f8;--line:#dce4ee;--tx:#152033;--mu:#68778b;--ac:#dca900;--acx:#fff;--user:#e8eef7;--code:#f1f4f8}
-body{background:radial-gradient(ellipse at 70% -20%,#24334b 0,transparent 42%),var(--bg)}
-#side{background:rgba(13,19,29,.94);backdrop-filter:blur(18px);border-inline-end-color:#263449}
-:root[data-theme=light] #side{background:rgba(255,255,255,.94)}
-.brand{padding:22px 18px 18px;font-size:21px;letter-spacing:-.4px}
-.brand i{width:34px;height:34px;border-radius:11px;clip-path:none;display:grid;place-items:center;box-shadow:0 5px 22px #f2c23033;position:relative}
-.brand i:after{content:"";position:absolute;width:12px;height:21px;background:#171100;clip-path:polygon(60% 0,0 58%,40% 58%,25% 100%,100% 38%,58% 38%)}
-.brand:after{content:"مساعدك الذكي";display:block;font-size:11px;color:var(--mu);font-weight:400;position:absolute;margin-top:38px;margin-inline-start:44px;letter-spacing:0}
-#side .btn{margin:18px 14px 12px;padding:13px 15px;border-radius:13px;box-shadow:0 8px 24px #e7b72b22}
-#search{border-radius:12px;padding:11px 13px;background:var(--panel2)}
-.ci{padding:11px 10px;border-radius:11px;margin:3px 0}
-.ci.on{background:linear-gradient(90deg,#f2c23018,transparent);border:1px solid #f2c23030}
-.foot{padding:12px;border-top-color:var(--line)}
-.foot button{border:1px solid var(--line);padding:9px 6px;border-radius:10px}
-#top{height:66px;padding:10px 22px;background:rgba(10,15,23,.54);backdrop-filter:blur(16px);border-bottom-color:var(--line)}
-:root[data-theme=light] #top{background:#ffffffb8}
-#top b{font-size:15px}
-#top:after{content:"● متصل";margin-inline-start:auto;color:#70d6a1;font-size:12px;background:#70d6a112;border:1px solid #70d6a12c;padding:6px 10px;border-radius:30px}
-#msgs{padding:30px 20px}
-.wrap{max-width:850px}
-.m{margin-bottom:28px;animation:messageIn .22s ease-out}
-@keyframes messageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-.m.a .bub{background:linear-gradient(145deg,#141f2eaa,#101722aa);border:1px solid #29384d;border-radius:4px 18px 18px 18px;padding:15px 18px}
-:root[data-theme=light] .m.a .bub{background:#fff;border-color:var(--line)}
-.m.u .bub{background:linear-gradient(135deg,#26374d,#1b293b);border:1px solid #354b65;border-radius:18px 4px 18px 18px;padding:11px 16px}
-:root[data-theme=light] .m.u .bub{background:#e8eef7;border-color:#d6e0ed}
-.bub{font-size:15.5px;line-height:1.95}
-.act{opacity:.72;transition:opacity .2s}
-.m:hover .act{opacity:1}
-.act button{border:1px solid transparent;padding:5px 9px}
-.act button:hover{border-color:var(--line)}
-#empty{padding-top:9vh}
-#empty h1{font-size:clamp(30px,5vw,44px);letter-spacing:-1px;background:linear-gradient(100deg,#fff 20%,#f5c542 80%);background-clip:text;color:transparent}
-:root[data-theme=light] #empty h1{background-image:linear-gradient(100deg,#172338 20%,#b78600 80%)}
-#empty p{font-size:15px;line-height:1.8}
-.sg{max-width:660px;gap:12px}
-.sg button{border-radius:15px;padding:16px;border-color:var(--line);background:linear-gradient(145deg,var(--panel),var(--panel2));transition:transform .18s,border-color .18s}
-.sg button:hover{transform:translateY(-2px);border-color:var(--ac)}
-#bar{padding:12px 20px calc(18px + env(safe-area-inset-bottom,0));background:linear-gradient(0deg,var(--bg) 65%,transparent)}
-#box{max-width:850px;border-radius:20px;padding:9px 10px 9px 9px;background:var(--panel);border-color:#34445a;box-shadow:0 12px 38px #0003}
-#box:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #f2c23018,0 12px 38px #0003}
-#in{font-size:15px;min-height:42px}
-#send{width:44px;height:44px;border-radius:14px;box-shadow:0 5px 16px #f2c23035}
-#note{font-size:11px;margin-top:10px}
-dialog{box-shadow:0 25px 90px #0009}
-#authGate{background:radial-gradient(ellipse at 50% 0,#26344a 0,transparent 55%),#070b12f5;backdrop-filter:blur(15px)}
-#authCard{border-radius:24px;padding:30px;background:linear-gradient(145deg,#141f2d,#0e1520);border-color:#34445a;box-shadow:0 28px 90px #0009}
-#authCard h2{font-size:27px;color:#f5c542}
-#authCard .btn{border-radius:12px;padding:12px}
-#authCard input{padding:13px;border-radius:12px}
-#authToggle{background:var(--panel2);border-radius:12px}
-@media(max-width:760px){
-#side{background:var(--panel);box-shadow:0 0 50px #0008}
-#top{height:58px;padding:8px 14px}
-#msgs{padding:20px 13px}
-#bar{padding-inline:12px}
-#empty{padding-top:7vh}
-#empty h1{font-size:32px}
-.sg{gap:8px}
-.sg button{padding:13px}
-.m.a .bub{padding:13px 14px}
-}
-
-
-/* Thunder Studio: composer, account and media */
-#tools{display:flex;align-items:center;gap:7px}
-.toolbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);display:grid;place-items:center;font-size:18px;flex-shrink:0}
-.toolbtn:hover,.toolbtn.active{border-color:var(--ac);color:var(--ac)}
-#attachTray{max-width:850px;margin:0 auto 8px;display:flex;gap:8px;flex-wrap:wrap}
-.filechip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:7px 10px;border-radius:12px;font-size:12px;max-width:100%}
-.filechip img{width:38px;height:38px;object-fit:cover;border-radius:7px}
-.filechip button{color:var(--mu);font-size:16px}
-#authProviders{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-#authProviders button{border:1px solid var(--line);border-radius:11px;padding:10px 5px;background:var(--panel2);font-size:13px}
-#authProviders button:hover{border-color:var(--ac)}
-#authDivider{text-align:center;color:var(--mu);font-size:12px;margin:13px 0 2px}
-#profileCard{display:flex;gap:12px;align-items:center;margin:8px 0 16px}
-#profileAvatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line)}
-#profileDlg input{margin-bottom:4px}
-.m .attachments{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
-.m .attachments img{max-width:min(240px,65vw);max-height:220px;object-fit:contain;border-radius:12px;border:1px solid var(--line)}
-.m .attachments .filetag{font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;color:var(--mu)}
-@media(max-width:760px){#tools{gap:5px}.toolbtn{width:39px;height:39px}#authProviders button{font-size:12px;padding:10px 2px}}
-
 </style>
 </head>
 <body>
 <aside id="side">
-  <div class="brand"><i></i><span>Thunder AI</span></div>
+  <div class="brand"><i></i>Thunder Ai</div>
   <button class="btn" id="new">محادثة جديدة</button>
   <input id="search" placeholder="بحث في المحادثات">
   <div id="list"></div>
   <div class="foot">
-    <button id="profileOpen">حسابي</button><button id="theme">المظهر</button><button id="set">إعدادات الذكاء</button><button id="logout">خروج</button>
+    <button id="theme">الوضع</button><button id="exp">تصدير</button><button id="imp">استيراد</button><button id="set">الإعدادات</button><button id="logout">خروج</button>
   </div>
 </aside>
 <section id="main">
   <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
-    <div id="attachTray" aria-live="polite"></div>
-    <div id="box"><input id="fileInput" type="file" hidden multiple accept="image/*,.txt,.md,.csv,.json"><button class="toolbtn" id="attachBtn" type="button" aria-label="إرفاق صورة أو ملف" title="إرفاق صورة أو ملف">＋</button><button class="toolbtn" id="voiceBtn" type="button" aria-label="إدخال صوتي" title="إملاء صوتي">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك إلى Thunder..."></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
+    <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
 </section>
@@ -205,15 +117,6 @@ dialog{box-shadow:0 25px 90px #0009}
   <div class="row"><button class="btn" id="s_save">حفظ</button><button class="g" id="s_reset">استعادة الافتراضي</button><button class="g" id="s_close">إغلاق</button></div>
 </dialog>
 
-<dialog id="profileDlg">
-  <h3>حسابي</h3>
-  <div id="profileCard"><img id="profileAvatar" alt="الصورة الشخصية"><div><b id="profileEmail">حساب Thunder</b><p class="hint">بيانات ملفك الشخصي</p></div></div>
-  <label>الاسم الظاهر</label><input id="profileName" maxlength="60" placeholder="اسمك">
-  <label>رابط الصورة الشخصية (اختياري)</label><input id="profilePhoto" type="url" placeholder="https://...">
-  <div class="row"><button class="btn" id="profileSave">حفظ التغييرات</button><button class="g" id="profileClose">إغلاق</button></div>
-  <p class="hint">تسجيل الدخول عبر Google وGitHub وApple يعتمد على تفعيل كل مزوّد في لوحة Supabase.</p>
-</dialog>
-
 <div id="authGate">
   <div id="authCard">
     <h2>Thunder Ai</h2>
@@ -225,15 +128,13 @@ dialog{box-shadow:0 25px 90px #0009}
       <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="6 أحرف على الأقل" dir="ltr">
       <div id="authActions"><button class="btn" id="authSubmit" type="submit">تسجيل الدخول</button><button class="g" id="authToggle" type="button">إنشاء حساب</button></div>
     </form>
-    <div id="authProviders"><button type="button" data-provider="google">Google</button><button type="button" data-provider="github">GitHub</button><button type="button" data-provider="apple">Apple</button></div>
-    <div id="authDivider">أو باستخدام البريد الإلكتروني</div>
     <div id="authMsg" role="status"></div>
   </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
-const DEF_SYS = "أنت Thunder AI، مساعد ذكي عام يتحدث بطلاقة بالعربية وباللهجة العراقية وباللغة التي يستخدمها الشخص. مطوّر المشروع بلند إدريس سرحان المعروف بناندو. أجب بدقة ووضوح، وافهم سياق المحادثة، ولا تختلق معلومات أو مصادر. نسّق الإجابات الطويلة بعناوين وقوائم، وضع الأكواد داخل كتل برمجية مع تحديد اللغة. اجعل الرد مباشراً ومفيداً.";
+const DEF_SYS = "أنت Thunder Ai، مساعد ذكاء اصطناعي عام يتحدث بطلاقة بالعربية وبأي لغة يكتب بها المستخدم. المطوّر الذي أنشأ هذا الموقع هو الأستاذ سايكو، مؤسس Thunder Ai. عند السؤال عن مطوّرك أو من أنشأك أجب بذلك. لا تستخدم الإيموجي إطلاقاً. أجب بدقة وصدق ووضوح، واكتب الأكواد داخل كتل برمجية مع تحديد اللغة، ونسّق الإجابات الطويلة بعناوين وقوائم. إذا لم تعرف شيئاً فقل ذلك بدل التخمين.";
 const $ = id => document.getElementById(id);
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch(e){ return d } },
@@ -246,7 +147,7 @@ let currentUser = null, currentSession = null, authMode = 'login';
 let chats = [];
 const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
-let cur = null, busy = false, ctrl = null;\nlet pendingAttachments = [];\nlet recognition = null;
+let cur = null, busy = false, ctrl = null;
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
@@ -319,8 +220,6 @@ async function loadCloudChats(){
   store.set('tai_chats', chats); render();
 }
 async function enterAccount(session){
-  if(!session?.user) throw new Error('لم تصل جلسة صالحة من Supabase.');
-  if(currentUser?.id === session.user.id && currentSession?.access_token === session.access_token) return;
   currentSession = session; currentUser = session.user;
   $('authGate').style.display = 'none';
   const display = (currentUser.email || 'user').split('@')[0];
@@ -329,14 +228,13 @@ async function enterAccount(session){
   if(!cur) newChat();
 }
 async function initAuth(){
-  const {data,error} = await supabase.auth.getSession();
-  if(error) $('authMsg').textContent = error.message;
-  if(data.session) await enterAccount(data.session); else $('authGate').style.display = 'flex';
-  supabase.auth.onAuthStateChange((event, session) => {
-    if(event === 'SIGNED_IN' && session && currentUser?.id !== session.user.id) {
-      enterAccount(session).catch(err => { $('authMsg').textContent = 'تم تسجيل الدخول لكن تعذر تحميل الحساب: ' + err.message; });
+  // لا نستعيد جلسة قديمة تلقائياً؛ الدخول يتم فقط بعد إدخال البريد وكلمة المرور.
+  $('authGate').style.display = 'flex';
+  supabase.auth.onAuthStateChange((event) => {
+    if(event === 'SIGNED_OUT'){
+      currentUser=null; currentSession=null; chats=[]; cur=null;
+      render(); $('authGate').style.display='flex';
     }
-    if(event === 'SIGNED_OUT' || !session){ currentUser=null; currentSession=null; chats=[]; cur=null; render(); $('authGate').style.display='flex'; }
   });
 }
 
@@ -433,7 +331,7 @@ function render(){
   renderList();
   const w = $('wrap'); w.innerHTML = '';
   if(!c || !c.msgs.length){
-    w.innerHTML = '<div id="empty"><h1>خلّ أفكارك تنطلق.</h1><p>مساعدك الذكي للكتابة، البرمجة، التعلّم وحلّ المشكلات.<br>ابدأ بسؤال، ودع Thunder AI يساعدك.</p><div class="sg"></div></div>';
+    w.innerHTML = '<div id="empty"><h1>Thunder Ai</h1><p>اسأل أي شيء، وستبقى محادثاتك محفوظة في حسابك.</p><div class="sg"></div></div>';
     SUG.forEach(s => { const b = document.createElement('button'); b.textContent = s; b.onclick = () => { $('in').value = s; send() }; w.querySelector('.sg').appendChild(b) });
     return;
   }
@@ -445,17 +343,11 @@ function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
 
 function send(){
   if(busy){ ctrl?.abort(); return }
-  const v = $('in').value.trim();
-  if(!v && !pendingAttachments.length) return;
-  const bad=pendingAttachments.filter(x=>x.unsupported);
-  if(bad.length){alert('نوع الملف غير مدعوم حالياً: '+bad.map(x=>x.name).join('، '));return}
+  const v = $('in').value.trim(); if(!v) return;
   if(!cur) newChat();
   const c = getCur();
-  const attachments=pendingAttachments.slice();
-  const extra=attachments.filter(x=>x.text).map(x=>'\\n\\n[محتوى الملف '+x.name+']\\n'+x.text).join('');
-  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v+extra, attachments});
-  if(c.msgs.length === 1) c.title = (v || attachments[0]?.name || 'مرفق').slice(0, 40);
-  pendingAttachments=[]; renderAttachmentTray();
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v});
+  if(c.msgs.length === 1) c.title = v.slice(0, 40);
   $('in').value = ''; autosize(); save(); render(); run();
 }
 
@@ -472,14 +364,7 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-20);
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => {
-      if(m.r==='user' && m.attachments?.some(x=>x.type?.startsWith('image/') && x.dataUrl)){
-        const parts=[{type:'text',text:m.c || 'حلّل الصورة المرفقة.'}];
-        m.attachments.filter(x=>x.type?.startsWith('image/') && x.dataUrl).forEach(x=>parts.push({type:'image_url',image_url:{url:x.dataUrl}}));
-        return {role:'user',content:parts};
-      }
-      return {role:m.r,content:m.c};
-    }))
+    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();
@@ -531,6 +416,16 @@ $('theme').onclick = () => { cfg.theme = cfg.theme === 'dark' ? 'light' : 'dark'
 $('wrap').addEventListener('click', e => {
   if(e.target.dataset.copy !== undefined){ const code = e.target.closest('.cb').querySelector('code').textContent; navigator.clipboard?.writeText(code); e.target.textContent = 'تم النسخ'; setTimeout(() => e.target.textContent = 'نسخ', 1200) }
 });
+$('exp').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(chats, null, 1)], {type:'application/json'}));
+  a.download = 'thunder-ai-chats.json'; a.click();
+};
+$('imp').onclick = () => {
+  const f = document.createElement('input'); f.type = 'file'; f.accept = '.json';
+  f.onchange = async () => { try{ const d = JSON.parse(await f.files[0].text()); if(Array.isArray(d)){ chats = d.concat(chats); cur = chats[0]?.id; save(); render() } }catch(e){ alert('ملف غير صالح') } };
+  f.click();
+};
 $('set').onclick = () => {
   $('s_temp').value = cfg.temp; $('s_sys').value = cfg.sys;
   $('dlg').showModal();
@@ -546,7 +441,6 @@ $('authToggle').onclick = () => {
   $('authIntro').textContent = authMode === 'login' ? 'سجّل دخولك لحفظ محادثاتك ومزامنتها بأمان.' : 'أنشئ حساباً جديداً للبدء باستخدام Thunder AI.';
   $('authPassword').autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
   $('authMsg').textContent = '';
-  $('authSubmit').disabled = false;
 };
 $('authForm').addEventListener('submit', async e => {
   e.preventDefault(); $('authSubmit').disabled = true; $('authMsg').textContent = 'جارٍ تنفيذ الطلب...';
@@ -555,91 +449,18 @@ $('authForm').addEventListener('submit', async e => {
     if(authMode === 'signup'){
       const {data,error} = await supabase.auth.signUp({email,password});
       if(error) throw error;
-      if(data.session) await enterAccount(data.session);
-      else $('authMsg').textContent = 'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم سجّل الدخول.';
+      if(data.session) await supabase.auth.signOut();
+      $('authMsg').textContent = data.session
+        ? 'تم إنشاء الحساب بنجاح. سجّل الدخول الآن باستخدام بريدك وكلمة المرور.'
+        : 'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم سجّل الدخول.';
     }else{
       const {data,error} = await supabase.auth.signInWithPassword({email,password});
       if(error) throw error; await enterAccount(data.session);
     }
-  }catch(err){ $('authMsg').textContent = authError(err); }
+  }catch(err){ $('authMsg').textContent = err.message || 'حدث خطأ.'; }
   finally{$('authSubmit').disabled=false;}
 });
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
-
-function renderAttachmentTray(){
-  const tray=$('attachTray'); tray.innerHTML='';
-  pendingAttachments.forEach((x,i)=>{
-    const chip=document.createElement('div');chip.className='filechip';
-    if(x.type?.startsWith('image/') && x.dataUrl){const im=document.createElement('img');im.src=x.dataUrl;chip.appendChild(im)}
-    const name=document.createElement('span');name.textContent=x.name;chip.appendChild(name);
-    const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label','إزالة المرفق');rm.onclick=()=>{pendingAttachments.splice(i,1);renderAttachmentTray()};chip.appendChild(rm);tray.appendChild(chip);
-  });
-}
-$('attachBtn').onclick=()=>$('fileInput').click();
-$('fileInput').onchange=async()=>{
-  const files=[...$('fileInput').files||[]];
-  for(const file of files){
-    if(file.size>6*1024*1024){alert('الحد الأقصى لحجم الملف 6MB: '+file.name);continue}\n    const totalSize=pendingAttachments.reduce((n,x)=>n+(x.size||0),0)+file.size;\n    if(totalSize>8*1024*1024){alert('الحد الإجمالي للمرفقات في الرسالة 8MB.');continue}
-    if(file.type.startsWith('image/')){
-      const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
-      pendingAttachments.push({name:file.name,type:file.type,dataUrl,size:file.size});
-    }else if(/^(text\/|application\/(json|csv))/.test(file.type)||/\.(txt|md|csv|json)$/i.test(file.name)){
-      const text=await file.text();pendingAttachments.push({name:file.name,type:file.type,text:text.slice(0,30000),size:file.size});
-    }else pendingAttachments.push({name:file.name,type:file.type,unsupported:true});
-  }
-  $('fileInput').value='';renderAttachmentTray();
-};
-$('voiceBtn').onclick=()=>{
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('الإملاء الصوتي غير مدعوم في هذا المتصفح. جرّب Safari أو Chrome محدّثاً.');return}
-  if(recognition){recognition.stop();recognition=null;$('voiceBtn').classList.remove('active');return}
-  recognition=new SR();recognition.lang='ar-IQ';recognition.continuous=true;recognition.interimResults=true;
-  $('voiceBtn').classList.add('active');
-  recognition.onresult=e=>{
-    let finalText='';
-    for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';
-    if(finalText){$('in').value=($('in').value+' '+finalText).trim();autosize()}
-  };
-  recognition.onerror=()=>{recognition=null;$('voiceBtn').classList.remove('active')};
-  recognition.onend=()=>{recognition=null;$('voiceBtn').classList.remove('active')};
-  recognition.start();
-};
-function authError(err){
-  const message=String(err?.message||'حدث خطأ غير معروف.');
-  if(/invalid login credentials/i.test(message)) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-  if(/email not confirmed/i.test(message)) return 'أكد بريدك الإلكتروني من الرسالة التي أرسلناها لك أولاً.';
-  if(/user already registered/i.test(message)) return 'هذا البريد مسجل مسبقاً. اختر تسجيل الدخول.';
-  if(/password should be at least/i.test(message)) return 'كلمة المرور قصيرة؛ استخدم 6 أحرف على الأقل.';
-  return message;
-}
-document.querySelectorAll('[data-provider]').forEach(btn=>btn.onclick=async()=>{
-  const provider=btn.dataset.provider;
-  const label=provider==='apple'?'Apple':provider==='github'?'GitHub':'Google';
-  document.querySelectorAll('[data-provider]').forEach(b=>b.disabled=true);
-  $('authMsg').textContent='جارٍ فتح تسجيل الدخول عبر '+label+'...';
-  try{
-    const {error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});
-    if(error) throw error;
-  }catch(err){ $('authMsg').textContent='تعذر تسجيل الدخول عبر '+label+': '+authError(err); }
-  finally{document.querySelectorAll('[data-provider]').forEach(b=>b.disabled=false)}
-});
-$('profileOpen').onclick=()=>{
-  if(!currentUser)return;
-  $('profileEmail').textContent=currentUser.email||'حساب Thunder';
-  $('profileName').value=currentUser.user_metadata?.display_name||currentUser.user_metadata?.full_name||'';
-  $('profilePhoto').value=currentUser.user_metadata?.avatar_url||currentUser.user_metadata?.picture||'';
-  $('profileAvatar').src=$('profilePhoto').value||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect width="80" height="80" rx="40" fill="%23232f40"/%3E%3Ctext x="40" y="51" text-anchor="middle" font-size="34" fill="%23f5c542"%3E✦%3C/text%3E%3C/svg%3E';
-  $('profileDlg').showModal();
-};
-$('profilePhoto').oninput=()=>{$('profileAvatar').src=$('profilePhoto').value||''};
-$('profileSave').onclick=async()=>{
-  $('profileSave').disabled=true;
-  const {data,error}=await supabase.auth.updateUser({data:{display_name:$('profileName').value.trim(),avatar_url:$('profilePhoto').value.trim()}});
-  $('profileSave').disabled=false;
-  if(error){alert('تعذر حفظ الملف الشخصي: '+error.message);return}
-  currentUser=data.user;$('profileDlg').close();
-};
-$('profileClose').onclick=()=>$('profileDlg').close();
 applyTheme();
 render();
 initAuth();

@@ -205,6 +205,15 @@ dialog{box-shadow:0 25px 90px #0009}
   <div class="row"><button class="btn" id="s_save">حفظ</button><button class="g" id="s_reset">استعادة الافتراضي</button><button class="g" id="s_close">إغلاق</button></div>
 </dialog>
 
+<dialog id="profileDlg">
+  <h3>حسابي</h3>
+  <div id="profileCard"><img id="profileAvatar" alt="الصورة الشخصية"><div><b id="profileEmail">حساب Thunder</b><p class="hint">بيانات ملفك الشخصي</p></div></div>
+  <label>الاسم الظاهر</label><input id="profileName" maxlength="60" placeholder="اسمك">
+  <label>رابط الصورة الشخصية (اختياري)</label><input id="profilePhoto" type="url" placeholder="https://...">
+  <div class="row"><button class="btn" id="profileSave">حفظ التغييرات</button><button class="g" id="profileClose">إغلاق</button></div>
+  <p class="hint">تسجيل الدخول عبر Google وGitHub وApple يعتمد على تفعيل كل مزوّد في لوحة Supabase.</p>
+</dialog>
+
 <div id="authGate">
   <div id="authCard">
     <h2>Thunder Ai</h2>

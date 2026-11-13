@@ -86,11 +86,77 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #authActions{display:flex;gap:8px;margin-top:16px}#authActions button{flex:1}
 #authMsg{font-size:13px;color:var(--ac);min-height:22px;margin-top:10px;line-height:1.6}
 #logout{color:var(--mu)}
+
+/* Thunder AI premium refresh */
+:root{--bg:#090d14;--panel:#101722;--panel2:#182231;--line:#253244;--tx:#f2f5fa;--mu:#9aa8ba;--ac:#f5c542;--acx:#171100;--user:#1c2b3d;--code:#080c12}
+:root[data-theme=light]{--bg:#f3f6fb;--panel:#fff;--panel2:#edf2f8;--line:#dce4ee;--tx:#152033;--mu:#68778b;--ac:#dca900;--acx:#fff;--user:#e8eef7;--code:#f1f4f8}
+body{background:radial-gradient(ellipse at 70% -20%,#24334b 0,transparent 42%),var(--bg)}
+#side{background:rgba(13,19,29,.94);backdrop-filter:blur(18px);border-inline-end-color:#263449}
+:root[data-theme=light] #side{background:rgba(255,255,255,.94)}
+.brand{padding:22px 18px 18px;font-size:21px;letter-spacing:-.4px}
+.brand i{width:34px;height:34px;border-radius:11px;clip-path:none;display:grid;place-items:center;box-shadow:0 5px 22px #f2c23033;position:relative}
+.brand i:after{content:"";position:absolute;width:12px;height:21px;background:#171100;clip-path:polygon(60% 0,0 58%,40% 58%,25% 100%,100% 38%,58% 38%)}
+.brand:after{content:"مساعدك الذكي";display:block;font-size:11px;color:var(--mu);font-weight:400;position:absolute;margin-top:38px;margin-inline-start:44px;letter-spacing:0}
+#side .btn{margin:18px 14px 12px;padding:13px 15px;border-radius:13px;box-shadow:0 8px 24px #e7b72b22}
+#search{border-radius:12px;padding:11px 13px;background:var(--panel2)}
+.ci{padding:11px 10px;border-radius:11px;margin:3px 0}
+.ci.on{background:linear-gradient(90deg,#f2c23018,transparent);border:1px solid #f2c23030}
+.foot{padding:12px;border-top-color:var(--line)}
+.foot button{border:1px solid var(--line);padding:9px 6px;border-radius:10px}
+#top{height:66px;padding:10px 22px;background:rgba(10,15,23,.54);backdrop-filter:blur(16px);border-bottom-color:var(--line)}
+:root[data-theme=light] #top{background:#ffffffb8}
+#top b{font-size:15px}
+#top:after{content:"● متصل";margin-inline-start:auto;color:#70d6a1;font-size:12px;background:#70d6a112;border:1px solid #70d6a12c;padding:6px 10px;border-radius:30px}
+#msgs{padding:30px 20px}
+.wrap{max-width:850px}
+.m{margin-bottom:28px;animation:messageIn .22s ease-out}
+@keyframes messageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.m.a .bub{background:linear-gradient(145deg,#141f2eaa,#101722aa);border:1px solid #29384d;border-radius:4px 18px 18px 18px;padding:15px 18px}
+:root[data-theme=light] .m.a .bub{background:#fff;border-color:var(--line)}
+.m.u .bub{background:linear-gradient(135deg,#26374d,#1b293b);border:1px solid #354b65;border-radius:18px 4px 18px 18px;padding:11px 16px}
+:root[data-theme=light] .m.u .bub{background:#e8eef7;border-color:#d6e0ed}
+.bub{font-size:15.5px;line-height:1.95}
+.act{opacity:.72;transition:opacity .2s}
+.m:hover .act{opacity:1}
+.act button{border:1px solid transparent;padding:5px 9px}
+.act button:hover{border-color:var(--line)}
+#empty{padding-top:9vh}
+#empty h1{font-size:clamp(30px,5vw,44px);letter-spacing:-1px;background:linear-gradient(100deg,#fff 20%,#f5c542 80%);background-clip:text;color:transparent}
+:root[data-theme=light] #empty h1{background-image:linear-gradient(100deg,#172338 20%,#b78600 80%)}
+#empty p{font-size:15px;line-height:1.8}
+.sg{max-width:660px;gap:12px}
+.sg button{border-radius:15px;padding:16px;border-color:var(--line);background:linear-gradient(145deg,var(--panel),var(--panel2));transition:transform .18s,border-color .18s}
+.sg button:hover{transform:translateY(-2px);border-color:var(--ac)}
+#bar{padding:12px 20px calc(18px + env(safe-area-inset-bottom,0));background:linear-gradient(0deg,var(--bg) 65%,transparent)}
+#box{max-width:850px;border-radius:20px;padding:9px 10px 9px 9px;background:var(--panel);border-color:#34445a;box-shadow:0 12px 38px #0003}
+#box:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #f2c23018,0 12px 38px #0003}
+#in{font-size:15px;min-height:42px}
+#send{width:44px;height:44px;border-radius:14px;box-shadow:0 5px 16px #f2c23035}
+#note{font-size:11px;margin-top:10px}
+dialog{box-shadow:0 25px 90px #0009}
+#authGate{background:radial-gradient(ellipse at 50% 0,#26344a 0,transparent 55%),#070b12f5;backdrop-filter:blur(15px)}
+#authCard{border-radius:24px;padding:30px;background:linear-gradient(145deg,#141f2d,#0e1520);border-color:#34445a;box-shadow:0 28px 90px #0009}
+#authCard h2{font-size:27px;color:#f5c542}
+#authCard .btn{border-radius:12px;padding:12px}
+#authCard input{padding:13px;border-radius:12px}
+#authToggle{background:var(--panel2);border-radius:12px}
+@media(max-width:760px){
+#side{background:var(--panel);box-shadow:0 0 50px #0008}
+#top{height:58px;padding:8px 14px}
+#msgs{padding:20px 13px}
+#bar{padding-inline:12px}
+#empty{padding-top:7vh}
+#empty h1{font-size:32px}
+.sg{gap:8px}
+.sg button{padding:13px}
+.m.a .bub{padding:13px 14px}
+}
+
 </style>
 </head>
 <body>
 <aside id="side">
-  <div class="brand"><i></i>Thunder Ai</div>
+  <div class="brand"><i></i><span>Thunder AI</span></div>
   <button class="btn" id="new">محادثة جديدة</button>
   <input id="search" placeholder="بحث في المحادثات">
   <div id="list"></div>
@@ -134,7 +200,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
-const DEF_SYS = "أنت Thunder Ai، مساعد ذكاء اصطناعي عام يتحدث بطلاقة بالعربية وبأي لغة يكتب بها المستخدم. المطوّر الذي أنشأ هذا الموقع هو الأستاذ سايكو، مؤسس Thunder Ai. عند السؤال عن مطوّرك أو من أنشأك أجب بذلك. لا تستخدم الإيموجي إطلاقاً. أجب بدقة وصدق ووضوح، واكتب الأكواد داخل كتل برمجية مع تحديد اللغة، ونسّق الإجابات الطويلة بعناوين وقوائم. إذا لم تعرف شيئاً فقل ذلك بدل التخمين.";
+const DEF_SYS = "أنت Thunder AI، مساعد ذكي عام يتحدث بطلاقة بالعربية وباللهجة العراقية وباللغة التي يستخدمها الشخص. مطوّر المشروع بلند إدريس سرحان المعروف بناندو. أجب بدقة ووضوح، وافهم سياق المحادثة، ولا تختلق معلومات أو مصادر. نسّق الإجابات الطويلة بعناوين وقوائم، وضع الأكواد داخل كتل برمجية مع تحديد اللغة. اجعل الرد مباشراً ومفيداً.";
 const $ = id => document.getElementById(id);
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch(e){ return d } },
@@ -330,7 +396,7 @@ function render(){
   renderList();
   const w = $('wrap'); w.innerHTML = '';
   if(!c || !c.msgs.length){
-    w.innerHTML = '<div id="empty"><h1>Thunder Ai</h1><p>اسأل أي شيء، وستبقى محادثاتك محفوظة في حسابك.</p><div class="sg"></div></div>';
+    w.innerHTML = '<div id="empty"><h1>خلّ أفكارك تنطلق.</h1><p>مساعدك الذكي للكتابة، البرمجة، التعلّم وحلّ المشكلات.<br>ابدأ بسؤال، ودع Thunder AI يساعدك.</p><div class="sg"></div></div>';
     SUG.forEach(s => { const b = document.createElement('button'); b.textContent = s; b.onclick = () => { $('in').value = s; send() }; w.querySelector('.sg').appendChild(b) });
     return;
   }

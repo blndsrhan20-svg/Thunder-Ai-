@@ -5,7 +5,7 @@ let activeDM=null,dmChannel=null,dmMessages=[];
 function dmInitial(name){return (name||'T').trim().slice(0,1).toUpperCase()}
 async function showDMView(){
  if(!currentUser()){$('authGate').style.display='flex';return}
- if(!$('communityView').hidden)await window.closeCommunity?.();
+ if(!$('communityView').hidden)$('communityBack').click();
  $('msgs').hidden=true;$('bar').hidden=true;$('dmView').hidden=false;$('title').textContent='الرسائل';
  await loadDMContacts();
 }

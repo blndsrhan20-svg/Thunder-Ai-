@@ -62,7 +62,14 @@ Deno.serve(async (req: Request) => {
       return { role, content: normalizeContent(m?.content) };
     }).filter((m: any) => typeof m.content === "string" ? m.content.length > 0 : m.content.length > 0);
 
-    const models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"];
+    // Route short everyday requests to Flash-Lite for lower latency; keep Flash for complex work.
+    const lastUser = [...messages].reverse().find((m: any) => m.role === "user");
+    const promptText = typeof lastUser?.content === "string" ? lastUser.content : "";
+    const complexTask = promptText.length > 220 ||
+      /(كود|برمج|حلل|حلّل|مشروع|قارن|خطوات|اشرح بالتفصيل|debug|code|build|analy[sz]e|compare|architecture)/i.test(promptText);
+    const models = complexTask
+      ? ["gemini-3.8-flash", "gemini-3.5-flash-lite"]
+      : ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
     let upstream: Response | null = null;
 
     for (let i = 0; i < models.length; i++) {
@@ -73,7 +80,7 @@ Deno.serve(async (req: Request) => {
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
           body: JSON.stringify({
             model: models[i], messages, stream: true,
-            temperature: Math.max(0, Math.min(2, Number(input.temperature ?? 0.7))),
+            temperature: Math.max(0, Math.min(2, Number(input.temperature ?? 0.7))),\n            max_tokens: 4096,
           }),
           signal: req.signal,
         },
@@ -94,7 +101,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(upstream.body, {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache", "Connection": "keep-alive" },
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "Connection": "keep-alive", "X-Accel-Buffering": "no" },
     });
   } catch (_error) {
     return new Response(JSON.stringify({ error: "Invalid request" }), {

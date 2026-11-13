@@ -76,6 +76,36 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #side.open{transform:none}
 #menu{display:block}.sg{grid-template-columns:1fr}.m.u .bub{max-width:95%}
 }
+
+/* Thunder AI feature suite + refreshed responsive shell */
+#top{background:linear-gradient(120deg,var(--panel),var(--bg))}
+#top .top-actions{margin-inline-start:auto;display:flex;gap:8px}
+#memoryBtn,.toolchip{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:8px 11px;font-size:13px}
+#memoryBtn:hover,.toolchip:hover{border-color:var(--ac)}
+#tools{max-width:780px;margin:0 auto 8px;display:flex;gap:7px;flex-wrap:wrap}
+#mode{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;font-size:13px}
+#bar{background:linear-gradient(0deg,var(--bg) 72%,transparent)}
+#box{box-shadow:0 8px 30px #00000012}
+#send{transition:transform .15s,filter .15s}
+#send:active{transform:scale(.94)}
+#authGate{background:radial-gradient(ellipse at 50% 15%,#49370d55,transparent 48%),#080b10f2;backdrop-filter:blur(14px)}
+#authCard{border-radius:24px;padding:30px;background:linear-gradient(145deg,var(--panel),#111722);border-color:#f2c23055;box-shadow:0 24px 90px #0009}
+#authCard h2{font-size:29px;letter-spacing:.3px}
+#authCard h2:before{content:"⚡";color:var(--ac);margin-inline-end:9px}
+#authCard input{min-height:46px}
+#authActions button{min-height:44px}
+#authSubmit:disabled{opacity:.55;cursor:wait}
+#memoryText{min-height:170px}
+#empty h1{background:linear-gradient(90deg,var(--tx),var(--ac));background-clip:text;-webkit-background-clip:text;color:transparent}
+@media(max-width:760px){
+ #top{padding:10px 12px}
+ #top .top-actions{gap:5px}
+ #memoryBtn{font-size:12px;padding:7px 9px}
+ #tools{padding-bottom:4px}
+ #bar{padding-inline:10px}
+ #authCard{padding:24px 20px}
+}
+
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 #authGate{position:fixed;inset:0;z-index:20;background:#080b10ed;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -99,9 +129,10 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   </div>
 </aside>
 <section id="main">
-  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b></div>
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
+    <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option><option value="iraqi">اللهجة العراقية</option><option value="badini">الكردية البادينية</option><option value="sorani">الكردية السورانية</option></select></div>
     <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
@@ -116,6 +147,8 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <textarea id="s_sys"></textarea>
   <div class="row"><button class="btn" id="s_save">حفظ</button><button class="g" id="s_reset">استعادة الافتراضي</button><button class="g" id="s_close">إغلاق</button></div>
 </dialog>
+
+<dialog id="memoryDlg"><h3>ذاكرة Thunder الشخصية</h3><p class="hint">هذه الملاحظات محفوظة محلياً على هذا الجهاز لهذا الحساب، وتُضاف إلى سياق محادثاتك. لا تضع كلمات مرور أو معلومات حساسة.</p><label for="memoryText">معلومات أريد من Thunder تذكّرها</label><textarea id="memoryText" placeholder="مثلاً: أفضل الإجابات المختصرة، أعمل على مشروع..."></textarea><div class="row"><button class="btn" id="memorySave">حفظ الذاكرة</button><button class="g" id="memoryClear">مسح</button><button class="g" id="memoryClose">إغلاق</button></div></dialog>
 
 <div id="authGate">
   <div id="authCard">
@@ -148,6 +181,7 @@ let chats = [];
 const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
 let cur = null, busy = false, ctrl = null;
+let userMemory = "";
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
@@ -220,7 +254,7 @@ async function loadCloudChats(){
   store.set('tai_chats', chats); render();
 }
 async function enterAccount(session){
-  currentSession = session; currentUser = session.user;
+  currentSession = session; currentUser = session.user; loadMemory();
   $('authGate').style.display = 'none';
   const display = (currentUser.email || 'user').split('@')[0];
   await supabase.from('profiles').upsert({id:currentUser.id,display_name:display},{onConflict:'id'});
@@ -238,6 +272,18 @@ async function initAuth(){
   });
 }
 
+function memoryKey(){ return 'thunder_memory_' + (currentUser?.id || 'guest') }
+function loadMemory(){ try{ userMemory = localStorage.getItem(memoryKey()) || ''; }catch(e){ userMemory = ''; } }
+function saveMemory(){ try{ localStorage.setItem(memoryKey(), userMemory); }catch(e){} }
+const MODE_PROMPTS = {
+  normal: '',
+  lab: '\n\nوضع مختبر القرار: حلّل المسألة من ثلاث زوايا مستقلة: (1) خبير يقترح الحل، (2) ناقد يبحث عن المخاطر والافتراضات، (3) منفّذ يحدد خطوات عملية. اختم بقرار موصى به وأسباب مختصرة. لا تدّعِ أنك شغّلت عدة نماذج؛ هذا تحليل متعدد الأدوار داخل استجابة واحدة.',
+  verify: '\n\nوضع تدقيق المعلومات: افصل بين الحقائق المعروفة والاستنتاجات والادعاءات غير المؤكدة. أعطِ درجة ثقة نوعية (مرتفعة/متوسطة/منخفضة) واذكر ما يلزم للتحقق. لا تختلق مصادر أو روابط ولا تدّعِ إجراء بحث مباشر إذا لم تتوفر أداة بحث.',
+  project: '\n\nوضع تحويل الفكرة إلى مشروع: حوّل الطلب إلى هدف ونطاق وميزات ومراحل تنفيذ وبنية تقنية ومخاطر واختبارات قبول. أعطِ أول خطوة قابلة للتنفيذ، ولا تدّعِ إنشاء ملفات أو نشر تطبيق ما لم يحدث ذلك فعلاً.',
+  iraqi: '\n\nاستخدم اللهجة العراقية الطبيعية والواضحة، مع الحفاظ على الدقة التقنية.',
+  badini: '\n\nأجب بالكردية البادينية (Badini) إذا كان ذلك ممكناً، وإذا كان المصطلح التقني أدق بالإنجليزية فاذكره بين قوسين.',
+  sorani: '\n\nأجب بالكردية السورانية (Sorani) إذا كان ذلك ممكناً، وإذا كان المصطلح التقني أدق بالإنجليزية فاذكره بين قوسين.'
+};
 function applyTheme(){ document.documentElement.dataset.theme = cfg.theme }
 function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
 
@@ -361,10 +407,10 @@ async function run(){
   ctrl = new AbortController();
   let renderQueued = false;
   // Keep the latest context only: smaller requests reach the model faster.
-  const recentHistory = c.msgs.slice(0, -1).slice(-20);
+  const recentHistory = c.msgs.slice(0, -1).slice(-12).map(m => ({...m,c:(m.c || '').slice(-12000)}));
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
+    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (userMemory ? '\\n\\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\\n' + userMemory : '')}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();
@@ -426,6 +472,10 @@ $('imp').onclick = () => {
   f.onchange = async () => { try{ const d = JSON.parse(await f.files[0].text()); if(Array.isArray(d)){ chats = d.concat(chats); cur = chats[0]?.id; save(); render() } }catch(e){ alert('ملف غير صالح') } };
   f.click();
 };
+$('memoryBtn').onclick = () => { loadMemory(); $('memoryText').value = userMemory; $('memoryDlg').showModal(); };
+$('memorySave').onclick = () => { userMemory = $('memoryText').value.trim().slice(0,6000); saveMemory(); $('memoryDlg').close(); $('note').textContent = 'تم حفظ ذاكرتك على هذا الجهاز.'; };
+$('memoryClear').onclick = () => { userMemory=''; saveMemory(); $('memoryText').value=''; };
+$('memoryClose').onclick = () => $('memoryDlg').close();
 $('set').onclick = () => {
   $('s_temp').value = cfg.temp; $('s_sys').value = cfg.sys;
   $('dlg').showModal();

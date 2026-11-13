@@ -352,22 +352,27 @@ async function sendCommunityMessage(event){
   finally{btn.disabled=false;btn.textContent='إرسال'}
 }
 async function searchCommunityMembers(){
-  const input=$('communitySearchInput'), term=input.value.trim();
-  const results=$('communitySearchResults');results.innerHTML='';
+  const term=$('communitySearchInput').value.trim(),results=$('communitySearchResults');
+  results.innerHTML='';
   if(!term){$('communitySearchStatus').textContent='اكتب الاسم أو رقم العضو للبحث.';return}
   if(/^\\d+$/.test(term)&&term.length!==8){$('communitySearchStatus').textContent='رقم العضو يجب أن يتكون من 8 أرقام.';return}
   $('communitySearchStatus').textContent='جارٍ البحث…';
   try{
-    let query=supabase.from('profiles').select('id,user_code,display_name,username').limit(20);
-    if(/^\\d{8}$/.test(term))query=query.eq('user_code',term);
-    else{
-      const safe=term.replace(/[,%()]/g,' ').trim();
+    let data=[];
+    if(/^\\d{8}$/.test(term)){
+      const result=await supabase.from('profiles').select('id,user_code,display_name,username').eq('user_code',term).limit(10);
+      if(result.error)throw result.error;data=result.data||[];
+    }else{
+      const safe=term.replace(/[%_]/g,' ').trim();
       if(!safe){$('communitySearchStatus').textContent='اكتب اسماً صالحاً للبحث.';return}
-      query=query.or('display_name.ilike.%'+safe+'%,username.ilike.%'+safe+'%');
+      const [byName,byUsername]=await Promise.all([
+        supabase.from('profiles').select('id,user_code,display_name,username').ilike('display_name','%'+safe+'%').limit(15),
+        supabase.from('profiles').select('id,user_code,display_name,username').ilike('username','%'+safe+'%').limit(15)
+      ]);
+      if(byName.error)throw byName.error;if(byUsername.error)throw byUsername.error;
+      const unique=new Map();[...(byName.data||[]),...(byUsername.data||[])].forEach(m=>unique.set(m.id,m));data=[...unique.values()].slice(0,20);
     }
-    const {data,error}=await query.order('display_name',{ascending:true});
-    if(error)throw error;
-    if(!data?.length){$('communitySearchStatus').textContent='ما لقينا عضو بهذا الاسم أو الرقم.';return}
+    if(!data.length){$('communitySearchStatus').textContent='ما لقينا عضو بهذا الاسم أو الرقم.';return}
     $('communitySearchStatus').textContent='نتائج البحث: '+data.length;
     data.forEach(member=>{
       const row=document.createElement('div');row.className='member-result';

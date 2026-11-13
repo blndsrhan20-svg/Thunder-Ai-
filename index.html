@@ -358,9 +358,12 @@ async function run(){
   c.msgs.push(msg); render();
   const el = $('wrap').lastChild.querySelector('.bub'); el.classList.add('cur');
   ctrl = new AbortController();
+  let renderQueued = false;
+  // Keep the latest context only: smaller requests reach the model faster.
+  const recentHistory = c.msgs.slice(0, -1).slice(-20);
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(c.msgs.slice(0, -1).map(m => ({role: m.r, content: m.c})))
+    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();
@@ -380,10 +383,19 @@ async function run(){
         const p = s.slice(5).trim(); if(p === '[DONE]') continue;
         try{ const j = JSON.parse(p); msg.c += j.choices?.[0]?.delta?.content || '' }catch(e){}
       }
-      el.innerHTML = md(msg.c);
-      const sc = $('msgs'); if(sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
+      // Batch visual updates to one paint per animation frame instead of parsing Markdown for every network chunk.
+      if(!renderQueued){
+        renderQueued = true;
+        requestAnimationFrame(() => {
+          renderQueued = false;
+          el.innerHTML = md(msg.c);
+          const sc = $('msgs');
+          if(sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
+        });
+      }
     }
     if(!msg.c) msg.c = 'لم يصل أي رد من الخادم.';
+    el.innerHTML = md(msg.c);
   }catch(e){
     if(e.name === 'AbortError'){ if(!msg.c) msg.c = 'تم إيقاف التوليد.' }
     else msg.c += (msg.c ? '\n\n' : '') + 'تعذر الاتصال بخدمة Gemini. ' + e.message;

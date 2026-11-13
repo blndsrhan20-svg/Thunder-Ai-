@@ -276,10 +276,71 @@ async function initAuth(){
   $('authGate').style.display = 'flex';
   supabase.auth.onAuthStateChange((event) => {
     if(event === 'SIGNED_OUT'){
-      currentUser=null; currentSession=null; chats=[]; cur=null;
+      if(communityChannel){supabase.removeChannel(communityChannel);communityChannel=null;}\n      communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;\n      currentUser=null; currentSession=null; chats=[]; cur=null;
       render(); $('authGate').style.display='flex';
     }
   });
+}
+
+
+function communityTime(value){try{return new Date(value).toLocaleString('ar-IQ',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}catch{return ''}}
+function renderCommunity(){
+  const feed=$('communityFeed');feed.innerHTML='';
+  if(!communityMessages.length){const empty=document.createElement('div');empty.className='community-empty';empty.textContent='ماكو رسائل لحد الآن. كن أول شخص يشارك في مجتمع ثاندر!';feed.appendChild(empty);return}
+  communityMessages.forEach(m=>{
+    const card=document.createElement('article');card.className='community-msg'+(m.user_id===currentUser?.id?' mine':'');
+    const meta=document.createElement('div');meta.className='community-meta';
+    const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';
+    const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(name,time);card.appendChild(meta);
+    const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body);
+    const actions=document.createElement('div');actions.className='community-actions';
+    if(m.user_id===currentUser?.id){const del=document.createElement('button');del.type='button';del.textContent='حذف رسالتي';del.onclick=()=>deleteCommunityMessage(m.id);actions.appendChild(del)}
+    else{const report=document.createElement('button');report.type='button';report.textContent='إبلاغ';report.onclick=()=>reportCommunityMessage(m.id);actions.appendChild(report)}
+    card.appendChild(actions);feed.appendChild(card);
+  });
+  feed.scrollTop=feed.scrollHeight;
+}
+function addCommunityMessage(m){if(!m?.id||communityMessages.some(x=>x.id===m.id))return;communityMessages.push(m);communityMessages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));if(communityMessages.length>100)communityMessages=communityMessages.slice(-100);renderCommunity()}
+async function loadCommunity(){
+  $('communityStatus').textContent='جارٍ الاتصال بالدردشة…';
+  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,content,created_at').order('created_at',{ascending:true}).limit(60);
+  if(error)throw error;communityMessages=data||[];renderCommunity();
+  if(communityChannel)await supabase.removeChannel(communityChannel);
+  communityChannel=supabase.channel('thunder-community-public')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'community_messages'},p=>addCommunityMessage(p.new))
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'community_messages'},p=>{communityMessages=communityMessages.filter(m=>m.id!==p.old.id);renderCommunity()})
+    .subscribe(status=>{$('communityStatus').textContent=status==='SUBSCRIBED'?'متصل الآن · الرسائل تتحدث مباشرة':status==='CHANNEL_ERROR'?'تعذر الاتصال المباشر؛ أعد فتح المجتمع':'جارٍ الاتصال بالدردشة…'});
+}
+async function openCommunity(){
+  if(!currentUser){$('authGate').style.display='flex';return}
+  $('moreMenu').hidden=true;$('msgs').hidden=true;$('bar').hidden=true;$('communityView').hidden=false;$('title').textContent='مجتمع ثاندر';
+  try{await loadCommunity()}catch(e){$('communityStatus').textContent='تعذر تحميل الدردشة: '+e.message}
+}
+async function closeCommunity(){
+  if(communityChannel){await supabase.removeChannel(communityChannel);communityChannel=null}
+  communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;$('title').textContent=getCur()?.title||'Thunder Ai';
+}
+async function sendCommunityMessage(event){
+  event.preventDefault();if(!currentUser)return;
+  const input=$('communityInput'),content=input.value.trim();if(!content)return;
+  if(content.length>1000){alert('الحد الأقصى 1000 حرف');return}
+  const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
+  const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
+  try{
+    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,content,created_at').single();
+    if(error)throw error;addCommunityMessage(data);input.value='';
+  }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
+  finally{btn.disabled=false;btn.textContent='إرسال'}
+}
+async function deleteCommunityMessage(id){
+  if(!confirm('تحذف رسالتك من المجتمع؟'))return;
+  const {error}=await supabase.from('community_messages').delete().eq('id',id);
+  if(error)alert('تعذر حذف الرسالة: '+error.message);else{communityMessages=communityMessages.filter(m=>m.id!==id);renderCommunity()}
+}
+async function reportCommunityMessage(id){
+  const reason=prompt('اكتب سبب الإبلاغ (3 إلى 300 حرف):');if(!reason||reason.trim().length<3)return;
+  const {error}=await supabase.from('community_reports').insert({message_id:id,reporter_id:currentUser.id,reason:reason.trim().slice(0,300)});
+  if(error)alert(error.code==='23505'?'سبق وأبلغت عن هذه الرسالة.':'تعذر إرسال الإبلاغ: '+error.message);else alert('وصل الإبلاغ. شكراً لمساعدتنا في الحفاظ على مجتمع آمن.')
 }
 
 function memoryKey(){ return 'thunder_memory_' + (currentUser?.id || 'guest') }
@@ -463,6 +524,11 @@ async function run(){
 
 function autosize(){ const t = $('in'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px' }
 
+$('communityOpen').onclick=()=>openCommunity();
+$('communityComposer').addEventListener('submit',sendCommunityMessage);
+$('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});
+$('communityInput').addEventListener('input',()=>{$('communityInput').style.height='auto';$('communityInput').style.height=Math.min($('communityInput').scrollHeight,130)+'px'});
+$('title').addEventListener('click',()=>{if(!$('communityView').hidden)closeCommunity()});
 $('in').addEventListener('input', autosize);
 $('in').addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send() } });
 $('send').onclick = send;

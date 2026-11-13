@@ -319,6 +319,8 @@ async function loadCloudChats(){
   store.set('tai_chats', chats); render();
 }
 async function enterAccount(session){
+  if(!session?.user) throw new Error('لم تصل جلسة صالحة من Supabase.');
+  if(currentUser?.id === session.user.id && currentSession?.access_token === session.access_token) return;
   currentSession = session; currentUser = session.user;
   $('authGate').style.display = 'none';
   const display = (currentUser.email || 'user').split('@')[0];
@@ -330,9 +332,11 @@ async function initAuth(){
   const {data,error} = await supabase.auth.getSession();
   if(error) $('authMsg').textContent = error.message;
   if(data.session) await enterAccount(data.session); else $('authGate').style.display = 'flex';
-  supabase.auth.onAuthStateChange((_event, session) => {
-    if(session && (!currentUser || currentUser.id !== session.user.id)) enterAccount(session);
-    if(!session){ currentUser=null; currentSession=null; chats=[]; cur=null; render(); $('authGate').style.display='flex'; }
+  supabase.auth.onAuthStateChange((event, session) => {
+    if(event === 'SIGNED_IN' && session && currentUser?.id !== session.user.id) {
+      enterAccount(session).catch(err => { $('authMsg').textContent = 'تم تسجيل الدخول لكن تعذر تحميل الحساب: ' + err.message; });
+    }
+    if(event === 'SIGNED_OUT' || !session){ currentUser=null; currentSession=null; chats=[]; cur=null; render(); $('authGate').style.display='flex'; }
   });
 }
 
@@ -542,6 +546,7 @@ $('authToggle').onclick = () => {
   $('authIntro').textContent = authMode === 'login' ? 'سجّل دخولك لحفظ محادثاتك ومزامنتها بأمان.' : 'أنشئ حساباً جديداً للبدء باستخدام Thunder AI.';
   $('authPassword').autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
   $('authMsg').textContent = '';
+  $('authSubmit').disabled = false;
 };
 $('authForm').addEventListener('submit', async e => {
   e.preventDefault(); $('authSubmit').disabled = true; $('authMsg').textContent = 'جارٍ تنفيذ الطلب...';
@@ -556,7 +561,7 @@ $('authForm').addEventListener('submit', async e => {
       const {data,error} = await supabase.auth.signInWithPassword({email,password});
       if(error) throw error; await enterAccount(data.session);
     }
-  }catch(err){ $('authMsg').textContent = err.message || 'حدث خطأ.'; }
+  }catch(err){ $('authMsg').textContent = authError(err); }
   finally{$('authSubmit').disabled=false;}
 });
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
@@ -599,10 +604,24 @@ $('voiceBtn').onclick=()=>{
   recognition.onend=()=>{recognition=null;$('voiceBtn').classList.remove('active')};
   recognition.start();
 };
+function authError(err){
+  const message=String(err?.message||'حدث خطأ غير معروف.');
+  if(/invalid login credentials/i.test(message)) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+  if(/email not confirmed/i.test(message)) return 'أكد بريدك الإلكتروني من الرسالة التي أرسلناها لك أولاً.';
+  if(/user already registered/i.test(message)) return 'هذا البريد مسجل مسبقاً. اختر تسجيل الدخول.';
+  if(/password should be at least/i.test(message)) return 'كلمة المرور قصيرة؛ استخدم 6 أحرف على الأقل.';
+  return message;
+}
 document.querySelectorAll('[data-provider]').forEach(btn=>btn.onclick=async()=>{
-  const provider=btn.dataset.provider; $('authMsg').textContent='جارٍ فتح تسجيل الدخول عبر '+provider+'...';
-  const {error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:location.href}});
-  if(error)$('authMsg').textContent='تعذر تسجيل الدخول: '+error.message;
+  const provider=btn.dataset.provider;
+  const label=provider==='apple'?'Apple':provider==='github'?'GitHub':'Google';
+  document.querySelectorAll('[data-provider]').forEach(b=>b.disabled=true);
+  $('authMsg').textContent='جارٍ فتح تسجيل الدخول عبر '+label+'...';
+  try{
+    const {error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});
+    if(error) throw error;
+  }catch(err){ $('authMsg').textContent='تعذر تسجيل الدخول عبر '+label+': '+authError(err); }
+  finally{document.querySelectorAll('[data-provider]').forEach(b=>b.disabled=false)}
 });
 $('profileOpen').onclick=()=>{
   if(!currentUser)return;

@@ -281,7 +281,8 @@ async function enterAccount(session){
   $('authGate').style.display = 'none';
   const display = currentUser.user_metadata?.display_name || (currentUser.email || 'user').split('@')[0];
   const handle=(currentUser.email||'member').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24)||'member';
-  await supabase.from('profiles').upsert({id:currentUser.id,display_name:display,username:handle},{onConflict:'id'});
+  const {data:oldProfile}=await supabase.from('profiles').select('username').eq('id',currentUser.id).maybeSingle();
+  await supabase.from('profiles').upsert({id:currentUser.id,display_name:display,username:oldProfile?.username||handle},{onConflict:'id'});
   const {data:communityProfile}=await supabase.from('profiles').select('user_code').eq('id',currentUser.id).maybeSingle();
   if(communityProfile?.user_code)$('myCommunityCode').textContent='رقمك: '+communityProfile.user_code;
   try{ await loadCloudChats(); }catch(e){ $('authMsg').textContent = 'تعذر تحميل محادثاتك: ' + e.message; }

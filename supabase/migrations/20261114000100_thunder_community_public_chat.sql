@@ -32,9 +32,26 @@ create policy community_messages_delete_own
 create or replace function public.enforce_community_message_rules()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
-as $$
+as $
+declare
+  account record;
 begin
+  select u.email, u.raw_user_meta_data into account
+  from auth.users u
+  where u.id = new.user_id;
+
+  if not found then
+    raise exception 'Invalid sender account';
+  end if;
+
+  new.sender_name := left(trim(coalesce(
+    account.raw_user_meta_data ->> 'display_name',
+    split_part(account.email, '@', 1),
+    'عضو ثاندر'
+  )), 40);
+
   if char_length(trim(new.content)) not between 1 and 1000 then
     raise exception 'Message must contain 1 to 1000 characters';
   end if;
@@ -45,7 +62,6 @@ begin
   ) then
     raise exception 'Please wait before sending another message';
   end if;
-  new.sender_name := left(trim(new.sender_name), 40);
   return new;
 end;
 $$;

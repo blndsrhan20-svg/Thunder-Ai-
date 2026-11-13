@@ -119,6 +119,18 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #logout{color:var(--mu)}
 
 #communityView{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--bg)}#communityView[hidden]{display:none}.community-head{padding:18px;border-bottom:1px solid var(--line);background:var(--panel)}.community-head h2{font-size:21px;margin-bottom:4px}.community-head p,#communityStatus{color:var(--mu);font-size:13px}#communityStatus{margin-top:8px}#communityFeed{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.community-empty{margin:auto;text-align:center;color:var(--mu);line-height:1.9;padding:24px}.community-msg{max-width:min(760px,100%);width:100%;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.community-msg.mine{border-color:#f2c23066}.community-meta{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:12px;margin-bottom:6px}.community-meta strong{color:var(--ac);font-size:14px}.community-content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:15px}.community-actions{display:flex;gap:8px;margin-top:7px}.community-actions button{font-size:11px;color:var(--mu);padding:3px 7px;border-radius:6px}#communityComposer{display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel)}#communityInput{flex:1;min-width:0;max-height:130px;resize:none;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px;line-height:1.6}#communitySend{background:var(--ac);color:var(--acx);font-weight:700;border-radius:11px;padding:11px 16px;min-height:44px}#communityOpen{white-space:nowrap}@media(max-width:760px){#communityOpen{font-size:11px;padding:7px 8px}.community-head{padding:14px}.community-msg{padding:10px 12px}#communityFeed{padding:12px}}
+
+.member-code{display:block;font-size:11px;color:var(--mu);direction:ltr;text-align:right;letter-spacing:1.5px;margin-top:2px}
+.community-member-search{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.community-member-search button{border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:12px;background:var(--panel2)}
+#communitySearchDialog{width:min(520px,calc(100% - 24px));max-height:80vh;overflow:auto}
+#communitySearchDialog input{width:100%;margin:12px 0;padding:12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:var(--tx)}
+#communitySearchResults{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.member-result{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--line);border-radius:12px}
+.member-result-info{flex:1;min-width:0}
+.member-result-name{font-weight:700;overflow-wrap:anywhere}
+.member-result-handle{font-size:12px;color:var(--mu);direction:ltr;text-align:right}
+.member-result button{border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12px}
 </style>
 </head>
 <body>
@@ -138,12 +150,13 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
   <section id="communityView" hidden aria-label="مجتمع ثاندر">
-    <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div id="communityStatus">الدردشة العامة</div></div>
+    <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div class="community-member-search"><button id="communityFindMember" type="button">⌕ البحث عن عضو</button><span id="myCommunityCode" class="member-code"></span></div><div id="communityStatus">الدردشة العامة</div></div>
     <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
     <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
   </section>
 </section>
 
+<dialog id="communitySearchDialog"><h3>البحث عن عضو</h3><p class="hint">ابحث بالاسم أو اسم المستخدم أو رقم العضو المكوّن من 8 أرقام.</p><input id="communitySearchInput" type="search" maxlength="60" placeholder="مثال: بلند أو 82828146" autocomplete="off"><div id="communitySearchStatus" class="hint">اكتب الاسم أو الرقم للبحث.</div><div id="communitySearchResults"></div><div class="row"><button class="g" id="communitySearchClose" type="button">إغلاق</button></div></dialog>
 <dialog id="dlg">
   <h3>الإعدادات</h3>
   <p class="hint">يعمل Thunder AI باستخدام Gemini عبر خادم آمن. مفتاح Gemini لا يظهر في المتصفح.</p>
@@ -268,6 +281,8 @@ async function enterAccount(session){
   $('authGate').style.display = 'none';
   const display = currentUser.user_metadata?.display_name || (currentUser.email || 'user').split('@')[0];
   await supabase.from('profiles').upsert({id:currentUser.id,display_name:display},{onConflict:'id'});
+  const {data:communityProfile}=await supabase.from('profiles').select('user_code').eq('id',currentUser.id).maybeSingle();
+  if(communityProfile?.user_code)$('myCommunityCode').textContent='رقمك: '+communityProfile.user_code;
   try{ await loadCloudChats(); }catch(e){ $('authMsg').textContent = 'تعذر تحميل محادثاتك: ' + e.message; }
   if(!cur) newChat();
 }
@@ -292,8 +307,10 @@ function renderCommunity(){
   communityMessages.forEach(m=>{
     const card=document.createElement('article');card.className='community-msg'+(m.user_id===currentUser?.id?' mine':'');
     const meta=document.createElement('div');meta.className='community-meta';
-    const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';
-    const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(name,time);card.appendChild(meta);
+    const identity=document.createElement('div');
+    const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';identity.appendChild(name);
+    if(m.sender_code){const code=document.createElement('span');code.className='member-code';code.textContent=m.sender_code;identity.appendChild(code)}
+    const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(identity,time);card.appendChild(meta);
     const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body);
     const actions=document.createElement('div');actions.className='community-actions';
     if(m.user_id===currentUser?.id){const del=document.createElement('button');del.type='button';del.textContent='حذف رسالتي';del.onclick=()=>deleteCommunityMessage(m.id);actions.appendChild(del)}
@@ -305,7 +322,7 @@ function renderCommunity(){
 function addCommunityMessage(m){if(!m?.id||communityMessages.some(x=>x.id===m.id))return;communityMessages.push(m);communityMessages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));if(communityMessages.length>100)communityMessages=communityMessages.slice(-100);renderCommunity()}
 async function loadCommunity(){
   $('communityStatus').textContent='جارٍ الاتصال بالدردشة…';
-  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,content,created_at').order('created_at',{ascending:true}).limit(60);
+  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,sender_code,content,created_at').order('created_at',{ascending:true}).limit(60);
   if(error)throw error;communityMessages=data||[];renderCommunity();
   if(communityChannel)await supabase.removeChannel(communityChannel);
   communityChannel=supabase.channel('thunder-community-public')
@@ -329,10 +346,45 @@ async function sendCommunityMessage(event){
   const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
   const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
   try{
-    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,content,created_at').single();
+    const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,sender_code,content,created_at').single();
     if(error)throw error;addCommunityMessage(data);input.value='';
   }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
   finally{btn.disabled=false;btn.textContent='إرسال'}
+}
+async function searchCommunityMembers(){
+  const term=$('communitySearchInput').value.trim(),results=$('communitySearchResults');
+  results.innerHTML='';
+  if(!term){$('communitySearchStatus').textContent='اكتب الاسم أو رقم العضو للبحث.';return}
+  if(/^\\d+$/.test(term)&&term.length!==8){$('communitySearchStatus').textContent='رقم العضو يجب أن يتكون من 8 أرقام.';return}
+  $('communitySearchStatus').textContent='جارٍ البحث…';
+  try{
+    let data=[];
+    if(/^\\d{8}$/.test(term)){
+      const result=await supabase.from('profiles').select('id,user_code,display_name,username').eq('user_code',term).limit(10);
+      if(result.error)throw result.error;data=result.data||[];
+    }else{
+      const safe=term.replace(/[%_]/g,' ').trim();
+      if(!safe){$('communitySearchStatus').textContent='اكتب اسماً صالحاً للبحث.';return}
+      const [byName,byUsername]=await Promise.all([
+        supabase.from('profiles').select('id,user_code,display_name,username').ilike('display_name','%'+safe+'%').limit(15),
+        supabase.from('profiles').select('id,user_code,display_name,username').ilike('username','%'+safe+'%').limit(15)
+      ]);
+      if(byName.error)throw byName.error;if(byUsername.error)throw byUsername.error;
+      const unique=new Map();[...(byName.data||[]),...(byUsername.data||[])].forEach(m=>unique.set(m.id,m));data=[...unique.values()].slice(0,20);
+    }
+    if(!data.length){$('communitySearchStatus').textContent='ما لقينا عضو بهذا الاسم أو الرقم.';return}
+    $('communitySearchStatus').textContent='نتائج البحث: '+data.length;
+    data.forEach(member=>{
+      const row=document.createElement('div');row.className='member-result';
+      const info=document.createElement('div');info.className='member-result-info';
+      const nm=document.createElement('div');nm.className='member-result-name';nm.textContent=member.display_name||'عضو ثاندر';
+      const code=document.createElement('div');code.className='member-result-handle';code.textContent=member.user_code||'';
+      info.append(nm,code);row.appendChild(info);
+      const copy=document.createElement('button');copy.type='button';copy.textContent='نسخ الرقم';
+      copy.onclick=async()=>{try{await navigator.clipboard.writeText(member.user_code);copy.textContent='تم النسخ'}catch{copy.textContent=member.user_code}};
+      row.appendChild(copy);results.appendChild(row);
+    });
+  }catch(e){$('communitySearchStatus').textContent='تعذر البحث: '+e.message}
 }
 async function deleteCommunityMessage(id){
   if(!confirm('تحذف رسالتك من المجتمع؟'))return;
@@ -527,6 +579,9 @@ async function run(){
 function autosize(){ const t = $('in'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px' }
 
 $('communityOpen').onclick=()=>openCommunity();
+$('communityFindMember').onclick=()=>{$('communitySearchDialog').showModal();$('communitySearchInput').focus()};
+$('communitySearchClose').onclick=()=>$('communitySearchDialog').close();
+$('communitySearchInput').addEventListener('input',searchCommunityMembers);
 $('communityBack').onclick=()=>closeCommunity();
 $('communityComposer').addEventListener('submit',sendCommunityMessage);
 $('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});

@@ -574,12 +574,12 @@ $('attachBtn').onclick=()=>$('fileInput').click();
 $('fileInput').onchange=async()=>{
   const files=[...$('fileInput').files||[]];
   for(const file of files){
-    if(file.size>6*1024*1024){alert('الحد الأقصى لحجم الملف 6MB: '+file.name);continue}
+    if(file.size>6*1024*1024){alert('الحد الأقصى لحجم الملف 6MB: '+file.name);continue}\n    const totalSize=pendingAttachments.reduce((n,x)=>n+(x.size||0),0)+file.size;\n    if(totalSize>8*1024*1024){alert('الحد الإجمالي للمرفقات في الرسالة 8MB.');continue}
     if(file.type.startsWith('image/')){
       const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
-      pendingAttachments.push({name:file.name,type:file.type,dataUrl});
+      pendingAttachments.push({name:file.name,type:file.type,dataUrl,size:file.size});
     }else if(/^(text\/|application\/(json|csv))/.test(file.type)||/\.(txt|md|csv|json)$/i.test(file.name)){
-      const text=await file.text();pendingAttachments.push({name:file.name,type:file.type,text:text.slice(0,30000)});
+      const text=await file.text();pendingAttachments.push({name:file.name,type:file.type,text:text.slice(0,30000),size:file.size});
     }else pendingAttachments.push({name:file.name,type:file.type,unsupported:true});
   }
   $('fileInput').value='';renderAttachmentTray();

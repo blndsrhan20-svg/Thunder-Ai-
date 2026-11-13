@@ -238,7 +238,7 @@ function persistChat(c){
       title: c.title,
       msgs: c.msgs.map(m => {
         if(!m.id) m.id = crypto.randomUUID();
-        return {id:m.id, r:m.r, c:m.c, image:m.image||null, audio:m.audio||null, mime:m.mime||null};
+        return {id:m.id, r:m.r, c:m.c, image:m.image||null};
       })
     };
     const {error: ce} = await supabase.from('conversations').upsert({
@@ -517,10 +517,10 @@ function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
 
 function send(){
   if(busy){ ctrl?.abort(); return }
-  const v = $('in').value.trim(); if(!v && !pendingImage && !pendingAudio) return;
+  const v = $('in').value.trim(); if(!v && !pendingImage) return;
   if(!cur) newChat();
   const c = getCur();
-  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v, image:pendingImage, }); pendingImage=null; pendingAudio=null; updateAttachmentPreview();
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v, image:pendingImage}); pendingImage=null; updateAttachmentPreview();
   if(c.msgs.length === 1) c.title = v.slice(0, 40);
   $('in').value = ''; autosize(); save(); render(); run();
 }
@@ -538,7 +538,7 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-12).map(m => ({...m,c:(m.c || '').slice(-12000)}));
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:(m.image||m.audio)?[{type:'text',text:m.c||'حلّل المرفق.'},...(m.image?[{type:'image_url',image_url:{url:m.image}}]:[]),]:m.c})))
+    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:m.image?[{type:'text',text:m.c||'حلّل المرفق.'},{type:'image_url',image_url:{url:m.image}}]:m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();

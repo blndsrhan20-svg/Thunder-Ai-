@@ -66,7 +66,6 @@ async function sendDM(event){
   if(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';image_path=activeDM.id+'/'+me.id+'/'+crypto.randomUUID()+'.'+ext;const up=await supabase.storage.from('thunder-chat-images').upload(image_path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error}
   const ins=await supabase.from('direct_messages').insert({conversation_id:activeDM.id,sender_id:me.id,content,image_path}).select('id,conversation_id,sender_id,content,image_path,created_at').single();
   if(ins.error)throw ins.error;
-  await supabase.from('direct_conversations').update({last_message_at:new Date().toISOString()}).eq('id',activeDM.id);
   if(!dmMessages.some(m=>m.id===ins.data.id)){dmMessages.push(ins.data);await renderDMMessages()}
   $('dmInput').value='';$('dmImageInput').value='';await loadDMContacts();
  }catch(error){alert('تعذر إرسال الرسالة: '+error.message)}

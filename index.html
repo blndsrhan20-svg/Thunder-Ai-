@@ -278,7 +278,7 @@ function renderList(){
     const d = document.createElement('div');
     d.className = 'ci' + (c.id === cur ? ' on' : '');
     d.innerHTML = `<span>${esc(c.title)}</span><button data-a="ren" title="تعديل الاسم">تعديل</button><button data-a="del" title="حذف">حذف</button>`;
-    d.onclick = e => {
+    d.onclick = async e => {
       const a = e.target.dataset.a;
       if(a === 'del'){
         if(confirm('حذف هذه المحادثة؟')){

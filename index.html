@@ -432,11 +432,17 @@ function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
 
 function send(){
   if(busy){ ctrl?.abort(); return }
-  const v = $('in').value.trim(); if(!v) return;
+  const v = $('in').value.trim();
+  if(!v && !pendingAttachments.length) return;
+  const bad=pendingAttachments.filter(x=>x.unsupported);
+  if(bad.length){alert('نوع الملف غير مدعوم حالياً: '+bad.map(x=>x.name).join('، '));return}
   if(!cur) newChat();
   const c = getCur();
-  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v});
-  if(c.msgs.length === 1) c.title = v.slice(0, 40);
+  const attachments=pendingAttachments.slice();
+  const extra=attachments.filter(x=>x.text).map(x=>'\\n\\n[محتوى الملف '+x.name+']\\n'+x.text).join('');
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v+extra, attachments});
+  if(c.msgs.length === 1) c.title = (v || attachments[0]?.name || 'مرفق').slice(0, 40);
+  pendingAttachments=[]; renderAttachmentTray();
   $('in').value = ''; autosize(); save(); render(); run();
 }
 
@@ -453,7 +459,14 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-20);
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
+    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(recentHistory.map(m => {
+      if(m.r==='user' && m.attachments?.some(x=>x.type?.startsWith('image/') && x.dataUrl)){
+        const parts=[{type:'text',text:m.c || 'حلّل الصورة المرفقة.'}];
+        m.attachments.filter(x=>x.type?.startsWith('image/') && x.dataUrl).forEach(x=>parts.push({type:'image_url',image_url:{url:x.dataUrl}}));
+        return {role:'user',content:parts};
+      }
+      return {role:m.r,content:m.c};
+    }))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();

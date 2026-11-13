@@ -11,7 +11,7 @@ create table if not exists public.direct_conversations (
 create index if not exists direct_conversations_member_one_idx on public.direct_conversations(member_one,last_message_at desc);
 create index if not exists direct_conversations_member_two_idx on public.direct_conversations(member_two,last_message_at desc);
 alter table public.direct_conversations enable row level security;
-grant select, insert, update on public.direct_conversations to authenticated;
+grant select, insert on public.direct_conversations to authenticated;
 drop policy if exists direct_conversations_read_member on public.direct_conversations;
 create policy direct_conversations_read_member on public.direct_conversations for select to authenticated
 using ((select auth.uid()) in (member_one,member_two));
@@ -19,9 +19,6 @@ drop policy if exists direct_conversations_create_member on public.direct_conver
 create policy direct_conversations_create_member on public.direct_conversations for insert to authenticated
 with check ((select auth.uid()) in (member_one,member_two));
 drop policy if exists direct_conversations_update_member on public.direct_conversations;
-create policy direct_conversations_update_member on public.direct_conversations for update to authenticated
-using ((select auth.uid()) in (member_one,member_two))
-with check ((select auth.uid()) in (member_one,member_two));
 
 create table if not exists public.direct_messages (
   id uuid primary key default gen_random_uuid(),
@@ -75,3 +72,19 @@ begin
   end if;
  end if;
 end $$;
+
+create or replace function public.touch_direct_conversation()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+begin
+  update public.direct_conversations
+  set last_message_at=now()
+  where id=new.conversation_id;
+  return new;
+end;
+$$;
+revoke all on function public.touch_direct_conversation() from public, anon, authenticated;
+drop trigger if exists direct_message_touch_conversation on public.direct_messages;
+create trigger direct_message_touch_conversation
+after insert on public.direct_messages
+for each row execute function public.touch_direct_conversation();

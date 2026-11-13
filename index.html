@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thunder Ai</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1016;--panel:#141922;--panel2:#1b212c;--line:#262e3b;--tx:#e9edf3;--mu:#8b95a5;--ac:#f2c230;--acx:#1a1400;--user:#1f2733;--code:#0a0d12}
+:root[data-theme=light]{--bg:#f6f7f9;--panel:#fff;--panel2:#eef0f4;--line:#dde1e8;--tx:#161a22;--mu:#6a7383;--ac:#d9a400;--acx:#fff;--user:#e8ebf1;--code:#f0f2f6}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:var(--bg);color:var(--tx);display:flex;overflow:hidden;padding-top:env(safe-area-inset-top,0)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+#side{width:290px;background:var(--panel);border-inline-end:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;transition:transform .2s}
+.brand{padding:18px 16px 10px;font-weight:700;font-size:20px;display:flex;align-items:center;gap:10px}
+.brand i{width:12px;height:22px;background:var(--ac);clip-path:polygon(60% 0,0 58%,40% 58%,25% 100%,100% 38%,58% 38%)}
+.btn{background:var(--ac);color:var(--acx);font-weight:600;border-radius:10px;padding:10px 14px}
+#side .btn{margin:6px 14px 10px}
+#search{margin:0 14px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:calc(100% - 28px)}
+#list{flex:1;overflow:auto;padding:0 8px}
+.ci{display:flex;align-items:center;gap:4px;border-radius:9px;padding:9px 10px;cursor:pointer;font-size:14px}
+.ci:hover,.ci.on{background:var(--panel2)}
+.ci span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci button{color:var(--mu);font-size:12px;padding:2px 6px;border-radius:6px}
+.ci button:hover{color:var(--tx);background:var(--line)}
+.foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.foot button{flex:1;background:var(--panel2);border-radius:9px;padding:8px;font-size:13px}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
+#top{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+#top b{font-weight:600}
+#menu{display:none;font-size:22px;padding:0 6px}
+#msgs{flex:1;overflow:auto;padding:24px 16px}
+.wrap{max-width:780px;margin:0 auto}
+.m{margin-bottom:22px;display:flex;flex-direction:column}
+.m.u{align-items:flex-start}
+.bub{max-width:100%;line-height:1.85;font-size:16px;word-wrap:break-word}
+.m.u .bub{background:var(--user);padding:10px 16px;border-radius:16px;max-width:85%;white-space:pre-wrap}
+.act{display:flex;gap:4px;margin-top:6px}
+.act button{font-size:12px;color:var(--mu);padding:3px 8px;border-radius:7px}
+.act button:hover{background:var(--panel2);color:var(--tx)}
+.bub p{margin:0 0 .8em}.bub h1,.bub h2,.bub h3{margin:1em 0 .5em;line-height:1.4}.bub h1{font-size:1.4em}.bub h2{font-size:1.2em}.bub h3{font-size:1.05em}
+.bub ul,.bub ol{padding-inline-start:1.4em;margin:0 0 .8em}
+.bub a{color:var(--ac)}
+.bub code{background:var(--code);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;font-size:.88em;direction:ltr;unicode-bidi:isolate}
+.cb{background:var(--code);border:1px solid var(--line);border-radius:12px;margin:0 0 .9em;overflow:hidden;direction:ltr;text-align:left}
+.cb header{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mu)}
+.cb pre{padding:12px;overflow:auto;font-family:ui-monospace,Menlo,monospace;font-size:13.5px;line-height:1.6}
+.cb pre code{background:none;padding:0}
+.cur::after{content:"";display:inline-block;width:8px;height:16px;background:var(--ac);margin-inline-start:4px;vertical-align:middle;animation:b 1s steps(2) infinite}
+@keyframes b{50%{opacity:0}}
+#empty{text-align:center;padding-top:12vh}
+#empty h1{font-size:34px;margin-bottom:8px}
+#empty p{color:var(--mu);margin-bottom:26px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px;margin:0 auto}
+.sg button{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:start;font-size:14px;line-height:1.6}
+.sg button:hover{border-color:var(--ac)}
+#bar{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0))}
+#box{max-width:780px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;align-items:flex-end;gap:8px;padding:8px}
+#box:focus-within{border-color:var(--ac)}
+#in{flex:1;background:none;border:0;resize:none;max-height:200px;padding:8px 10px;line-height:1.6;outline:0}
+#send{width:42px;height:42px;border-radius:12px;background:var(--ac);color:var(--acx);font-weight:700;flex-shrink:0}
+#note{text-align:center;font-size:12px;color:var(--mu);margin-top:8px}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(520px,92vw);margin:auto}
+dialog::backdrop{background:#0009}
+dialog label{display:block;font-size:13px;color:var(--mu);margin:12px 0 4px}
+dialog input,dialog textarea,dialog select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+dialog textarea{min-height:130px;resize:vertical}
+dialog .row{display:flex;gap:8px;margin-top:16px}
+dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
+.hint{font-size:12px;color:var(--mu);margin-top:6px;line-height:1.7}
+@media(max-width:760px){
+#side{position:fixed;inset-block:0;inset-inline-start:0;z-index:5;transform:translateX(100%);padding-top:env(safe-area-inset-top,0)}
+#side.open{transform:none}
+#menu{display:block}.sg{grid-template-columns:1fr}.m.u .bub{max-width:95%}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#authGate{position:fixed;inset:0;z-index:20;background:#080b10ed;display:flex;align-items:center;justify-content:center;padding:20px}
+#authCard{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 20px 70px #0008}
+#authCard h2{margin-bottom:8px}#authCard p{color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px}
+#authCard label{display:block;color:var(--mu);font-size:13px;margin:12px 0 5px}
+#authCard input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+#authActions{display:flex;gap:8px;margin-top:16px}#authActions button{flex:1}
+#authMsg{font-size:13px;color:var(--ac);min-height:22px;margin-top:10px;line-height:1.6}
+#logout{color:var(--mu)}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="brand"><i></i>Thunder Ai</div>
+  <button class="btn" id="new">محادثة جديدة</button>
+  <input id="search" placeholder="بحث في المحادثات">
+  <div id="list"></div>
+  <div class="foot">
+    <button id="theme">الوضع</button><button id="exp">تصدير</button><button id="imp">استيراد</button><button id="set">الإعدادات</button><button id="logout">خروج</button>
+  </div>
+</aside>
+<section id="main">
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b></div>
+  <div id="msgs"><div class="wrap" id="wrap"></div></div>
+  <div id="bar">
+    <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
+    <div id="note">محادثاتك محفوظة في حسابك الخاص على Thunder AI.</div>
+  </div>
+</section>
+
+<dialog id="dlg">
+  <h3>الإعدادات</h3>
+  <p class="hint">يعمل Thunder AI باستخدام Gemini عبر خادم آمن. مفتاح Gemini لا يظهر في المتصفح.</p>
+  <label>درجة الإبداع (0 إلى 2)</label>
+  <input id="s_temp" type="number" min="0" max="2" step="0.1">
+  <label>تعليمات النظام</label>
+  <textarea id="s_sys"></textarea>
+  <div class="row"><button class="btn" id="s_save">حفظ</button><button class="g" id="s_reset">استعادة الافتراضي</button><button class="g" id="s_close">إغلاق</button></div>
+</dialog>
+
+<div id="authGate">
+  <div id="authCard">
+    <h2>Thunder Ai</h2>
+    <p id="authIntro">سجّل دخولك لحفظ محادثاتك ومزامنتها بأمان.</p>
+    <form id="authForm">
+      <label for="authEmail">البريد الإلكتروني</label>
+      <input id="authEmail" type="email" autocomplete="email" required placeholder="name@example.com" dir="ltr">
+      <label for="authPassword">كلمة المرور</label>
+      <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="6 أحرف على الأقل" dir="ltr">
+      <div id="authActions"><button class="btn" id="authSubmit" type="submit">تسجيل الدخول</button><button class="g" id="authToggle" type="button">إنشاء حساب</button></div>
+    </form>
+    <div id="authMsg" role="status"></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+const DEF_SYS = "أنت Thunder Ai، مساعد ذكاء اصطناعي عام يتحدث بطلاقة بالعربية وبأي لغة يكتب بها المستخدم. المطوّر الذي أنشأ هذا الموقع هو الأستاذ سايكو، مؤسس Thunder Ai. عند السؤال عن مطوّرك أو من أنشأك أجب بذلك. لا تستخدم الإيموجي إطلاقاً. أجب بدقة وصدق ووضوح، واكتب الأكواد داخل كتل برمجية مع تحديد اللغة، ونسّق الإجابات الطويلة بعناوين وقوائم. إذا لم تعرف شيئاً فقل ذلك بدل التخمين.";
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch(e){ return d } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} }
+};
+const SUPABASE_URL = 'https://qdadoqjecoztygckuckm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_is9fla7kfuUa00zjPrDk5w_P2vEAFAS';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null, currentSession = null, authMode = 'login';
+let chats = [];
+let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
+let cur = null, busy = false, ctrl = null;
+
+const SUG = [
+  "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
+  "اكتب لي سكربت بايثون لقراءة ملف CSV وتحليله",
+  "ساعدني في كتابة رسالة رسمية لطلب إجازة",
+  "قارن بين React و Vue مع أمثلة"
+];
+
+function save(){
+  store.set('tai_chats', chats);
+  const c = getCur(); if(c && currentUser) persistChat(c).catch(e => console.error('Cloud save failed', e));
+}
+function saveCfg(){ store.set('tai_cfg', cfg) }
+async function persistChat(c){
+  if(!currentUser || !c) return;
+  const {error: ce} = await supabase.from('conversations').upsert({id:c.id,user_id:currentUser.id,title:c.title,updated_at:new Date().toISOString()});
+  if(ce) throw ce;
+  const {error: de} = await supabase.from('messages').delete().eq('conversation_id',c.id);
+  if(de) throw de;
+  const rows = c.msgs.map(m => ({id:m.id || crypto.randomUUID(),conversation_id:c.id,user_id:currentUser.id,role:m.r,content:m.c}));
+  c.msgs.forEach((m,i) => { if(!m.id) m.id = rows[i].id; });
+  if(rows.length){ const {error: me} = await supabase.from('messages').insert(rows); if(me) throw me; }
+}
+async function loadCloudChats(){
+  const {data: cs, error: ce} = await supabase.from('conversations').select('id,title,created_at,updated_at').order('updated_at',{ascending:false});
+  if(ce) throw ce;
+  const ids = (cs || []).map(x => x.id);
+  let ms = [];
+  if(ids.length){ const {data,error} = await supabase.from('messages').select('id,conversation_id,role,content,created_at').in('conversation_id',ids).order('created_at',{ascending:true}); if(error) throw error; ms = data || []; }
+  chats = (cs || []).map(c => ({id:c.id,title:c.title,msgs:ms.filter(m => m.conversation_id === c.id).map(m => ({id:m.id,r:m.role,c:m.content})),t:new Date(c.updated_at || c.created_at).getTime()}));
+  cur = chats[0]?.id || null;
+  store.set('tai_chats', chats); render();
+}
+async function enterAccount(session){
+  currentSession = session; currentUser = session.user;
+  $('authGate').style.display = 'none';
+  const display = (currentUser.email || 'user').split('@')[0];
+  await supabase.from('profiles').upsert({id:currentUser.id,display_name:display},{onConflict:'id'});
+  try{ await loadCloudChats(); }catch(e){ $('authMsg').textContent = 'تعذر تحميل محادثاتك: ' + e.message; }
+  if(!cur) newChat();
+}
+async function initAuth(){
+  const {data,error} = await supabase.auth.getSession();
+  if(error) $('authMsg').textContent = error.message;
+  if(data.session) await enterAccount(data.session); else $('authGate').style.display = 'flex';
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if(session && (!currentUser || currentUser.id !== session.user.id)) enterAccount(session);
+    if(!session){ currentUser=null; currentSession=null; chats=[]; cur=null; render(); $('authGate').style.display='flex'; }
+  });
+}
+
+function applyTheme(){ document.documentElement.dataset.theme = cfg.theme }
+function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
+
+function md(src){
+  const blocks = [];
+  let t = src.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g, (_, l, c) => {
+    blocks.push(`<div class="cb"><header><span>${esc(l || 'code')}</span><button data-copy>نسخ</button></header><pre><code>${esc(c.replace(/\n$/, ''))}</code></pre></div>`);
+    return `\u0000${blocks.length - 1}\u0000`;
+  });
+  t = esc(t);
+  t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>')
+       .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>')
+       .replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<i>$2</i>')
+       .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  const out = []; let list = null;
+  const close = () => { if(list){ out.push(`</${list}>`); list = null } };
+  for(const ln of t.split('\n')){
+    let m;
+    if(m = ln.match(/^(#{1,3})\s+(.*)/)){ close(); out.push(`<h${m[1].length}>${m[2]}</h${m[1].length}>`) }
+    else if(m = ln.match(/^\s*[-*]\s+(.*)/)){ if(list !== 'ul'){ close(); out.push('<ul>'); list = 'ul' } out.push(`<li>${m[1]}</li>`) }
+    else if(m = ln.match(/^\s*\d+[.)]\s+(.*)/)){ if(list !== 'ol'){ close(); out.push('<ol>'); list = 'ol' } out.push(`<li>${m[1]}</li>`) }
+    else if(ln.trim() === ''){ close(); out.push('') }
+    else { close(); out.push(`<p>${ln}</p>`) }
+  }
+  close();
+  return out.join('\n').replace(/\u0000(\d+)\u0000/g, (_, i) => blocks[i]);
+}
+
+function newChat(){
+  const c = {id: crypto.randomUUID(), title:'محادثة جديدة', msgs:[], t:Date.now()};
+  chats.unshift(c); cur = c.id; save(); render(); $('in').focus();
+}
+function getCur(){ return chats.find(c => c.id === cur) }
+
+function renderList(){
+  const q = $('search').value.trim();
+  $('list').innerHTML = '';
+  chats.filter(c => !q || c.title.includes(q)).forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'ci' + (c.id === cur ? ' on' : '');
+    d.innerHTML = `<span>${esc(c.title)}</span><button data-a="ren" title="تعديل الاسم">تعديل</button><button data-a="del" title="حذف">حذف</button>`;
+    d.onclick = e => {
+      const a = e.target.dataset.a;
+      if(a === 'del'){ if(confirm('حذف هذه المحادثة؟')){ if(currentUser) supabase.from('conversations').delete().eq('id',c.id).then(({error})=>{if(error)console.error(error)}); chats = chats.filter(x => x.id !== c.id); if(cur === c.id) cur = chats[0]?.id || null; if(!cur) return newChat(); save(); render() } return }
+      if(a === 'ren'){ const n = prompt('اسم المحادثة', c.title); if(n){ c.title = n.slice(0, 80); save(); render() } return }
+      cur = c.id; $('side').classList.remove('open'); render();
+    };
+    $('list').appendChild(d);
+  });
+}
+
+function bubble(m, i, last){
+  const d = document.createElement('div');
+  d.className = 'm ' + (m.r === 'user' ? 'u' : 'a');
+  const b = document.createElement('div'); b.className = 'bub';
+  if(m.r === 'user') b.textContent = m.c; else b.innerHTML = md(m.c);
+  d.appendChild(b);
+  const a = document.createElement('div'); a.className = 'act';
+  a.innerHTML = '<button data-a="copy">نسخ</button>' + (m.r === 'user' ? '<button data-a="edit">تعديل</button>' : (last ? '<button data-a="regen">إعادة التوليد</button>' : ''));
+  a.onclick = e => {
+    const k = e.target.dataset.a; if(!k || busy) return;
+    if(k === 'copy') navigator.clipboard?.writeText(m.c);
+    if(k === 'edit'){ const c = getCur(); $('in').value = m.c; c.msgs = c.msgs.slice(0, i); save(); render(); $('in').focus(); autosize() }
+    if(k === 'regen'){ const c = getCur(); c.msgs = c.msgs.slice(0, i); save(); render(); run() }
+  };
+  d.appendChild(a);
+  return d;
+}
+
+function render(){
+  const c = getCur();
+  $('title').textContent = c ? c.title : 'Thunder Ai';
+  renderList();
+  const w = $('wrap'); w.innerHTML = '';
+  if(!c || !c.msgs.length){
+    w.innerHTML = '<div id="empty"><h1>Thunder Ai</h1><p>اسأل أي شيء، وستبقى محادثاتك محفوظة في حسابك.</p><div class="sg"></div></div>';
+    SUG.forEach(s => { const b = document.createElement('button'); b.textContent = s; b.onclick = () => { $('in').value = s; send() }; w.querySelector('.sg').appendChild(b) });
+    return;
+  }
+  c.msgs.forEach((m, i) => w.appendChild(bubble(m, i, i === c.msgs.length - 1)));
+  $('msgs').scrollTop = $('msgs').scrollHeight;
+}
+
+function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
+
+function send(){
+  if(busy){ ctrl?.abort(); return }
+  const v = $('in').value.trim(); if(!v) return;
+  if(!cur) newChat();
+  const c = getCur();
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v});
+  if(c.msgs.length === 1) c.title = v.slice(0, 40);
+  $('in').value = ''; autosize(); save(); render(); run();
+}
+
+async function run(){
+  const c = getCur();
+  if(!currentUser){ $('authGate').style.display='flex'; return; }
+  setBusy(true);
+  const msg = {id:crypto.randomUUID(),r:'assistant', c:''};
+  c.msgs.push(msg); render();
+  const el = $('wrap').lastChild.querySelector('.bub'); el.classList.add('cur');
+  ctrl = new AbortController();
+  const body = {
+    stream: true, temperature: Number(cfg.temp),
+    messages: [{role:'system', content: cfg.sys || DEF_SYS}].concat(c.msgs.slice(0, -1).map(m => ({role: m.r, content: m.c})))
+  };
+  try{
+    const {data: fresh} = await supabase.auth.getSession();
+    currentSession = fresh.session || currentSession;
+    if(!currentSession) throw new Error('انتهت جلستك. سجّل الدخول من جديد.');
+    const res = await fetch(SUPABASE_URL + '/functions/v1/thunder-chat', {method:'POST', signal: ctrl.signal,
+      headers: {'Content-Type':'application/json','Authorization':'Bearer ' + currentSession.access_token,'apikey':SUPABASE_KEY},
+      body: JSON.stringify({messages:body.messages,temperature:body.temperature})});
+    if(!res.ok){ const tx = (await res.text()).slice(0, 500); throw new Error('خطأ ' + res.status + ': ' + tx) }
+    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+    for(;;){
+      const {done, value} = await rd.read(); if(done) break;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for(const l of lines){
+        const s = l.trim(); if(!s.startsWith('data:')) continue;
+        const p = s.slice(5).trim(); if(p === '[DONE]') continue;
+        try{ const j = JSON.parse(p); msg.c += j.choices?.[0]?.delta?.content || '' }catch(e){}
+      }
+      el.innerHTML = md(msg.c);
+      const sc = $('msgs'); if(sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
+    }
+    if(!msg.c) msg.c = 'لم يصل أي رد من الخادم.';
+  }catch(e){
+    if(e.name === 'AbortError'){ if(!msg.c) msg.c = 'تم إيقاف التوليد.' }
+    else msg.c += (msg.c ? '\n\n' : '') + 'تعذر الاتصال بخدمة Gemini. ' + e.message;
+  }
+  setBusy(false); save(); render();
+}
+
+function autosize(){ const t = $('in'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px' }
+
+$('in').addEventListener('input', autosize);
+$('in').addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send() } });
+$('send').onclick = send;
+$('new').onclick = () => { newChat(); $('side').classList.remove('open') };
+$('menu').onclick = () => $('side').classList.toggle('open');
+$('search').oninput = renderList;
+$('theme').onclick = () => { cfg.theme = cfg.theme === 'dark' ? 'light' : 'dark'; saveCfg(); applyTheme() };
+$('wrap').addEventListener('click', e => {
+  if(e.target.dataset.copy !== undefined){ const code = e.target.closest('.cb').querySelector('code').textContent; navigator.clipboard?.writeText(code); e.target.textContent = 'تم النسخ'; setTimeout(() => e.target.textContent = 'نسخ', 1200) }
+});
+$('exp').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(chats, null, 1)], {type:'application/json'}));
+  a.download = 'thunder-ai-chats.json'; a.click();
+};
+$('imp').onclick = () => {
+  const f = document.createElement('input'); f.type = 'file'; f.accept = '.json';
+  f.onchange = async () => { try{ const d = JSON.parse(await f.files[0].text()); if(Array.isArray(d)){ chats = d.concat(chats); cur = chats[0]?.id; save(); render() } }catch(e){ alert('ملف غير صالح') } };
+  f.click();
+};
+$('set').onclick = () => {
+  $('s_temp').value = cfg.temp; $('s_sys').value = cfg.sys;
+  $('dlg').showModal();
+};
+$('s_save').onclick = () => { cfg.temp = $('s_temp').value || 0.7; cfg.sys = $('s_sys').value.trim() || DEF_SYS; saveCfg(); $('dlg').close() };
+$('s_reset').onclick = () => { $('s_sys').value = DEF_SYS };
+$('s_close').onclick = () => $('dlg').close();
+
+$('authToggle').onclick = () => {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  $('authSubmit').textContent = authMode === 'login' ? 'تسجيل الدخول' : 'إنشاء الحساب';
+  $('authToggle').textContent = authMode === 'login' ? 'إنشاء حساب' : 'لدي حساب';
+  $('authIntro').textContent = authMode === 'login' ? 'سجّل دخولك لحفظ محادثاتك ومزامنتها بأمان.' : 'أنشئ حساباً جديداً للبدء باستخدام Thunder AI.';
+  $('authPassword').autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
+  $('authMsg').textContent = '';
+};
+$('authForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('authSubmit').disabled = true; $('authMsg').textContent = 'جارٍ تنفيذ الطلب...';
+  const email = $('authEmail').value.trim(), password = $('authPassword').value;
+  try{
+    if(authMode === 'signup'){
+      const {data,error} = await supabase.auth.signUp({email,password});
+      if(error) throw error;
+      if(data.session) await enterAccount(data.session);
+      else $('authMsg').textContent = 'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم سجّل الدخول.';
+    }else{
+      const {data,error} = await supabase.auth.signInWithPassword({email,password});
+      if(error) throw error; await enterAccount(data.session);
+    }
+  }catch(err){ $('authMsg').textContent = err.message || 'حدث خطأ.'; }
+  finally{$('authSubmit').disabled=false;}
+});
+$('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
+applyTheme();
+render();
+initAuth();
+</script>
+</body>
+</html>

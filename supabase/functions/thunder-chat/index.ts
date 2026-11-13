@@ -73,18 +73,24 @@ Deno.serve(async (req: Request) => {
     let upstream: Response | null = null;
 
     for (let i = 0; i < models.length; i++) {
-      upstream = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: models[i], messages, stream: true,
-            temperature: Math.max(0, Math.min(2, Number(input.temperature ?? 0.7))),\n            max_tokens: 4096,
-          }),
-          signal: req.signal,
-        },
-      );
+      try {
+        upstream = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+            body: JSON.stringify({
+              model: models[i], messages, stream: true,
+              temperature: Math.max(0, Math.min(2, Number(input.temperature ?? 0.7))),
+              max_tokens: 4096,
+            }),
+            signal: req.signal,
+          },
+        );
+      } catch (error) {
+        if (req.signal.aborted || i === models.length - 1) throw error;
+        continue;
+      }
 
       const retryable = [429, 500, 502, 503, 504].includes(upstream.status);
       if (upstream.ok || !retryable || i === models.length - 1) break;

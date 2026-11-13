@@ -103,7 +103,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
     <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
-    <div id="note">محادثاتك محفوظة في حسابك الخاص على Thunder AI.</div>
+    <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
 </section>
 
@@ -145,6 +145,7 @@ const SUPABASE_KEY = 'sb_publishable_is9fla7kfuUa00zjPrDk5w_P2vEAFAS';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null, currentSession = null, authMode = 'login';
 let chats = [];
+const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
 let cur = null, busy = false, ctrl = null;
 
@@ -157,18 +158,56 @@ const SUG = [
 
 function save(){
   store.set('tai_chats', chats);
-  const c = getCur(); if(c && currentUser) persistChat(c).catch(e => console.error('Cloud save failed', e));
+  const c = getCur();
+  if(c && currentUser){
+    $('note').textContent = 'جارٍ حفظ المحادثة...';
+    persistChat(c).then(() => {
+      if(getCur()?.id === c.id) $('note').textContent = 'تم حفظ المحادثة في حسابك.';
+    }).catch(e => {
+      console.error('Cloud save failed', e);
+      if(getCur()?.id === c.id) $('note').textContent = 'تعذر الحفظ السحابي. تحقق من الاتصال ثم أعد المحاولة.';
+    });
+  }
 }
 function saveCfg(){ store.set('tai_cfg', cfg) }
-async function persistChat(c){
-  if(!currentUser || !c) return;
-  const {error: ce} = await supabase.from('conversations').upsert({id:c.id,user_id:currentUser.id,title:c.title,updated_at:new Date().toISOString()});
-  if(ce) throw ce;
-  const {error: de} = await supabase.from('messages').delete().eq('conversation_id',c.id);
-  if(de) throw de;
-  const rows = c.msgs.map(m => ({id:m.id || crypto.randomUUID(),conversation_id:c.id,user_id:currentUser.id,role:m.r,content:m.c}));
-  c.msgs.forEach((m,i) => { if(!m.id) m.id = rows[i].id; });
-  if(rows.length){ const {error: me} = await supabase.from('messages').insert(rows); if(me) throw me; }
+function persistChat(c){
+  if(!currentUser || !c) return Promise.resolve();
+  const previous = saveQueues.get(c.id) || Promise.resolve();
+  const task = previous.catch(() => {}).then(async () => {
+    const ownerId = currentUser?.id;
+    if(!ownerId) return;
+    const snapshot = {
+      id: c.id,
+      title: c.title,
+      msgs: c.msgs.map(m => {
+        if(!m.id) m.id = crypto.randomUUID();
+        return {id:m.id, r:m.r, c:m.c};
+      })
+    };
+    const {error: ce} = await supabase.from('conversations').upsert({
+      id:snapshot.id, user_id:ownerId, title:snapshot.title, updated_at:new Date().toISOString()
+    }, {onConflict:'id'});
+    if(ce) throw ce;
+
+    const rows = snapshot.msgs.map(m => ({
+      id:m.id, conversation_id:snapshot.id, user_id:ownerId, role:m.r, content:m.c
+    }));
+    if(rows.length){
+      const {error: me} = await supabase.from('messages').upsert(rows, {onConflict:'id'});
+      if(me) throw me;
+      const ids = rows.map(m => m.id).join(',');
+      const {error: de} = await supabase.from('messages')
+        .delete().eq('conversation_id',snapshot.id).not('id','in',`(${ids})`);
+      if(de) throw de;
+    } else {
+      const {error: de} = await supabase.from('messages').delete().eq('conversation_id',snapshot.id);
+      if(de) throw de;
+    }
+  });
+  saveQueues.set(c.id, task);
+  return task.finally(() => {
+    if(saveQueues.get(c.id) === task) saveQueues.delete(c.id);
+  });
 }
 async function loadCloudChats(){
   const {data: cs, error: ce} = await supabase.from('conversations').select('id,title,created_at,updated_at').order('updated_at',{ascending:false});
@@ -241,7 +280,25 @@ function renderList(){
     d.innerHTML = `<span>${esc(c.title)}</span><button data-a="ren" title="تعديل الاسم">تعديل</button><button data-a="del" title="حذف">حذف</button>`;
     d.onclick = e => {
       const a = e.target.dataset.a;
-      if(a === 'del'){ if(confirm('حذف هذه المحادثة؟')){ if(currentUser) supabase.from('conversations').delete().eq('id',c.id).then(({error})=>{if(error)console.error(error)}); chats = chats.filter(x => x.id !== c.id); if(cur === c.id) cur = chats[0]?.id || null; if(!cur) return newChat(); save(); render() } return }
+      if(a === 'del'){
+        if(confirm('حذف هذه المحادثة؟')){
+          try{
+            await (saveQueues.get(c.id) || Promise.resolve()).catch(() => {});
+            if(currentUser){
+              const {error: me} = await supabase.from('messages').delete().eq('conversation_id',c.id);
+              if(me) throw me;
+              const {error: ce} = await supabase.from('conversations').delete().eq('id',c.id);
+              if(ce) throw ce;
+            }
+            chats = chats.filter(x => x.id !== c.id);
+            if(cur === c.id) cur = chats[0]?.id || null;
+            if(!cur) return newChat();
+            store.set('tai_chats', chats);
+            render();
+          }catch(err){ alert('تعذر حذف المحادثة من الحساب: ' + err.message); }
+        }
+        return;
+      }
       if(a === 'ren'){ const n = prompt('اسم المحادثة', c.title); if(n){ c.title = n.slice(0, 80); save(); render() } return }
       cur = c.id; $('side').classList.remove('open'); render();
     };

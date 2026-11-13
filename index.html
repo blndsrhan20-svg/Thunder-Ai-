@@ -152,7 +152,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 <section id="dmView" hidden aria-label="الرسائل الخاصة"><div class="dm-head"><div><b>الرسائل</b><div class="hint">محادثات خاصة · رسائل وصور فقط</div></div><button id="dmBack" class="toolchip" type="button">رجوع</button></div><div class="dm-layout"><div id="dmContacts"><div class="community-empty">ابحث عن عضو لبدء محادثة</div></div><div id="dmThread"><div id="dmThreadHead">اختر محادثة للبدء</div><div id="dmMessages"><div class="community-empty">رسائلك الخاصة تظهر هنا</div></div><form id="dmComposer"><button id="dmImageBtn" type="button">＋ صورة</button><input id="dmImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><textarea id="dmInput" rows="1" maxlength="4000" placeholder="اكتب رسالة..." disabled></textarea><button id="dmSend" type="submit" disabled>إرسال</button></form></div></div></section>\n  <section id="communityView" hidden aria-label="مجتمع ثاندر">
     <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div class="community-member-search"><button id="communityFindMember" type="button">⌕ البحث عن عضو</button><span id="myCommunityCode" class="member-code"></span></div><div id="communityStatus">الدردشة العامة</div></div>
     <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
-    <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
+    <form id="communityComposer"><button id="communityImageBtn" type="button" class="toolchip">＋ صورة</button><input id="communityImageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة أو أرفق صورة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
   </section>
 </section>
 
@@ -312,7 +312,7 @@ function renderCommunity(){
     const name=document.createElement('strong');name.textContent=m.sender_name||'عضو ثاندر';identity.appendChild(name);
     if(m.sender_code){const code=document.createElement('span');code.className='member-code';code.textContent=m.sender_code;identity.appendChild(code)}
     const time=document.createElement('span');time.textContent=communityTime(m.created_at);meta.append(identity,time);card.appendChild(meta);
-    const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body);
+    if(m.content){const body=document.createElement('div');body.className='community-content';body.textContent=m.content;card.appendChild(body)}if(m.image_path){const pic=document.createElement('img');pic.alt='صورة من المجتمع';pic.style.cssText='display:block;max-width:min(560px,100%);max-height:420px;object-fit:contain;border-radius:14px;margin-top:9px';supabase.storage.from('thunder-chat-images').createSignedUrl(m.image_path,3600).then(({data,error})=>{if(!error&&data?.signedUrl)pic.src=data.signedUrl});card.appendChild(pic)}
     const actions=document.createElement('div');actions.className='community-actions';
     if(m.user_id===currentUser?.id){const del=document.createElement('button');del.type='button';del.textContent='حذف رسالتي';del.onclick=()=>deleteCommunityMessage(m.id);actions.appendChild(del)}
     else{const report=document.createElement('button');report.type='button';report.textContent='إبلاغ';report.onclick=()=>reportCommunityMessage(m.id);actions.appendChild(report)}
@@ -323,7 +323,7 @@ function renderCommunity(){
 function addCommunityMessage(m){if(!m?.id||communityMessages.some(x=>x.id===m.id))return;communityMessages.push(m);communityMessages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));if(communityMessages.length>100)communityMessages=communityMessages.slice(-100);renderCommunity()}
 async function loadCommunity(){
   $('communityStatus').textContent='جارٍ الاتصال بالدردشة…';
-  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,sender_code,content,created_at').order('created_at',{ascending:true}).limit(60);
+  const {data,error}=await supabase.from('community_messages').select('id,user_id,sender_name,sender_code,content,image_path,created_at').order('created_at',{ascending:true}).limit(60);
   if(error)throw error;communityMessages=data||[];renderCommunity();
   if(communityChannel)await supabase.removeChannel(communityChannel);
   communityChannel=supabase.channel('thunder-community-public')
@@ -342,13 +342,13 @@ async function closeCommunity(){
 }
 async function sendCommunityMessage(event){
   event.preventDefault();if(!currentUser)return;
-  const input=$('communityInput'),content=input.value.trim();if(!content)return;
+  const input=$('communityInput'),file=$('communityImageInput').files?.[0],content=input.value.trim()||(file?'صورة':'');if(!content&&!file)return;if(file&&(!file.type.startsWith('image/')||file.size>10*1024*1024)){alert('اختر صورة لا يتجاوز حجمها 10MB');return}
   if(content.length>1000){alert('الحد الأقصى 1000 حرف');return}
   const btn=$('communitySend');btn.disabled=true;btn.textContent='…';
   const sender=(currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'عضو ثاندر').trim().slice(0,40);
   try{
     const {data,error}=await supabase.from('community_messages').insert({user_id:currentUser.id,sender_name:sender,content}).select('id,user_id,sender_name,sender_code,content,created_at').single();
-    if(error)throw error;addCommunityMessage(data);input.value='';
+    if(error)throw error;addCommunityMessage(data);input.value='';$('communityImageInput').value='';
   }catch(e){const msg=e.message||'حدث خطأ';alert(msg.includes('wait before')?'انتظر لحظة قبل إرسال رسالة أخرى.':'تعذر إرسال الرسالة: '+msg)}
   finally{btn.disabled=false;btn.textContent='إرسال'}
 }
@@ -584,7 +584,7 @@ $('communityFindMember').onclick=()=>{$('communitySearchDialog').showModal();$('
 $('communitySearchClose').onclick=()=>$('communitySearchDialog').close();
 $('communitySearchInput').addEventListener('input',searchCommunityMembers);
 $('communityBack').onclick=()=>closeCommunity();
-$('communityComposer').addEventListener('submit',sendCommunityMessage);
+$('communityComposer').addEventListener('submit',sendCommunityMessage);$('communityImageBtn').onclick=()=>$('communityImageInput').click();$('communityImageInput').onchange=()=>{const f=$('communityImageInput').files?.[0];if(f&&(!f.type.startsWith('image/')||f.size>10*1024*1024)){alert('الصورة يجب أن تكون أقل من 10MB');$('communityImageInput').value=''}};
 $('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});
 $('communityInput').addEventListener('input',()=>{$('communityInput').style.height='auto';$('communityInput').style.height=Math.min($('communityInput').scrollHeight,130)+'px'});
 $('title').addEventListener('click',()=>{if(!$('communityView').hidden)closeCommunity()});

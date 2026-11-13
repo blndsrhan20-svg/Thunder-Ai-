@@ -461,20 +461,9 @@ $('send').onclick = send;
 $('new').onclick = () => { newChat(); $('side').classList.remove('open') };
 $('menu').onclick = () => $('side').classList.toggle('open');
 $('search').oninput = renderList;
-$('theme').onclick = () => { cfg.theme = cfg.theme === 'dark' ? 'light' : 'dark'; saveCfg(); applyTheme() };
 $('wrap').addEventListener('click', e => {
   if(e.target.dataset.copy !== undefined){ const code = e.target.closest('.cb').querySelector('code').textContent; navigator.clipboard?.writeText(code); e.target.textContent = 'تم النسخ'; setTimeout(() => e.target.textContent = 'نسخ', 1200) }
 });
-$('exp').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(chats, null, 1)], {type:'application/json'}));
-  a.download = 'thunder-ai-chats.json'; a.click();
-};
-$('imp').onclick = () => {
-  const f = document.createElement('input'); f.type = 'file'; f.accept = '.json';
-  f.onchange = async () => { try{ const d = JSON.parse(await f.files[0].text()); if(Array.isArray(d)){ chats = d.concat(chats); cur = chats[0]?.id; save(); render() } }catch(e){ alert('ملف غير صالح') } };
-  f.click();
-};
 $('memoryBtn').onclick = () => { loadMemory(); $('memoryText').value = userMemory; $('memoryDlg').showModal(); };
 $('memorySave').onclick = () => { userMemory = $('memoryText').value.trim().slice(0,6000); saveMemory(); $('memoryDlg').close(); $('note').textContent = 'تم حفظ ذاكرتك على هذا الجهاز.'; };
 $('memoryClear').onclick = () => { userMemory=''; saveMemory(); $('memoryText').value=''; };

@@ -152,6 +152,27 @@ dialog{box-shadow:0 25px 90px #0009}
 .m.a .bub{padding:13px 14px}
 }
 
+
+/* Thunder Studio: composer, account and media */
+#tools{display:flex;align-items:center;gap:7px}
+.toolbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.toolbtn:hover,.toolbtn.active{border-color:var(--ac);color:var(--ac)}
+#attachTray{max-width:850px;margin:0 auto 8px;display:flex;gap:8px;flex-wrap:wrap}
+.filechip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:7px 10px;border-radius:12px;font-size:12px;max-width:100%}
+.filechip img{width:38px;height:38px;object-fit:cover;border-radius:7px}
+.filechip button{color:var(--mu);font-size:16px}
+#authProviders{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+#authProviders button{border:1px solid var(--line);border-radius:11px;padding:10px 5px;background:var(--panel2);font-size:13px}
+#authProviders button:hover{border-color:var(--ac)}
+#authDivider{text-align:center;color:var(--mu);font-size:12px;margin:13px 0 2px}
+#profileCard{display:flex;gap:12px;align-items:center;margin:8px 0 16px}
+#profileAvatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line)}
+#profileDlg input{margin-bottom:4px}
+.m .attachments{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.m .attachments img{max-width:min(240px,65vw);max-height:220px;object-fit:contain;border-radius:12px;border:1px solid var(--line)}
+.m .attachments .filetag{font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;color:var(--mu)}
+@media(max-width:760px){#tools{gap:5px}.toolbtn{width:39px;height:39px}#authProviders button{font-size:12px;padding:10px 2px}}
+
 </style>
 </head>
 <body>
@@ -168,7 +189,8 @@ dialog{box-shadow:0 25px 90px #0009}
   <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
-    <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
+    <div id="attachTray" aria-live="polite"></div>
+    <div id="box"><input id="fileInput" type="file" hidden multiple accept="image/*,.txt,.md,.csv,.json"><button class="toolbtn" id="attachBtn" type="button" aria-label="إرفاق صورة أو ملف" title="إرفاق صورة أو ملف">＋</button><button class="toolbtn" id="voiceBtn" type="button" aria-label="إدخال صوتي" title="إملاء صوتي">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك إلى Thunder..."></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
 </section>
@@ -194,6 +216,8 @@ dialog{box-shadow:0 25px 90px #0009}
       <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="6 أحرف على الأقل" dir="ltr">
       <div id="authActions"><button class="btn" id="authSubmit" type="submit">تسجيل الدخول</button><button class="g" id="authToggle" type="button">إنشاء حساب</button></div>
     </form>
+    <div id="authProviders"><button type="button" data-provider="google">Google</button><button type="button" data-provider="github">GitHub</button><button type="button" data-provider="apple">Apple</button></div>
+    <div id="authDivider">أو باستخدام البريد الإلكتروني</div>
     <div id="authMsg" role="status"></div>
   </div>
 </div>
@@ -213,7 +237,7 @@ let currentUser = null, currentSession = null, authMode = 'login';
 let chats = [];
 const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
-let cur = null, busy = false, ctrl = null;
+let cur = null, busy = false, ctrl = null;\nlet pendingAttachments = [];\nlet recognition = null;
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
@@ -524,6 +548,67 @@ $('authForm').addEventListener('submit', async e => {
   finally{$('authSubmit').disabled=false;}
 });
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
+
+function renderAttachmentTray(){
+  const tray=$('attachTray'); tray.innerHTML='';
+  pendingAttachments.forEach((x,i)=>{
+    const chip=document.createElement('div');chip.className='filechip';
+    if(x.type?.startsWith('image/') && x.dataUrl){const im=document.createElement('img');im.src=x.dataUrl;chip.appendChild(im)}
+    const name=document.createElement('span');name.textContent=x.name;chip.appendChild(name);
+    const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label','إزالة المرفق');rm.onclick=()=>{pendingAttachments.splice(i,1);renderAttachmentTray()};chip.appendChild(rm);tray.appendChild(chip);
+  });
+}
+$('attachBtn').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=async()=>{
+  const files=[...$('fileInput').files||[]];
+  for(const file of files){
+    if(file.size>6*1024*1024){alert('الحد الأقصى لحجم الملف 6MB: '+file.name);continue}
+    if(file.type.startsWith('image/')){
+      const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+      pendingAttachments.push({name:file.name,type:file.type,dataUrl});
+    }else if(/^(text\/|application\/(json|csv))/.test(file.type)||/\.(txt|md|csv|json)$/i.test(file.name)){
+      const text=await file.text();pendingAttachments.push({name:file.name,type:file.type,text:text.slice(0,30000)});
+    }else pendingAttachments.push({name:file.name,type:file.type,unsupported:true});
+  }
+  $('fileInput').value='';renderAttachmentTray();
+};
+$('voiceBtn').onclick=()=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('الإملاء الصوتي غير مدعوم في هذا المتصفح. جرّب Safari أو Chrome محدّثاً.');return}
+  if(recognition){recognition.stop();recognition=null;$('voiceBtn').classList.remove('active');return}
+  recognition=new SR();recognition.lang='ar-IQ';recognition.continuous=true;recognition.interimResults=true;
+  $('voiceBtn').classList.add('active');
+  recognition.onresult=e=>{
+    let finalText='';
+    for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';
+    if(finalText){$('in').value=($('in').value+' '+finalText).trim();autosize()}
+  };
+  recognition.onerror=()=>{recognition=null;$('voiceBtn').classList.remove('active')};
+  recognition.onend=()=>{recognition=null;$('voiceBtn').classList.remove('active')};
+  recognition.start();
+};
+document.querySelectorAll('[data-provider]').forEach(btn=>btn.onclick=async()=>{
+  const provider=btn.dataset.provider; $('authMsg').textContent='جارٍ فتح تسجيل الدخول عبر '+provider+'...';
+  const {error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:location.href}});
+  if(error)$('authMsg').textContent='تعذر تسجيل الدخول: '+error.message;
+});
+$('profileOpen').onclick=()=>{
+  if(!currentUser)return;
+  $('profileEmail').textContent=currentUser.email||'حساب Thunder';
+  $('profileName').value=currentUser.user_metadata?.display_name||currentUser.user_metadata?.full_name||'';
+  $('profilePhoto').value=currentUser.user_metadata?.avatar_url||currentUser.user_metadata?.picture||'';
+  $('profileAvatar').src=$('profilePhoto').value||'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect width="80" height="80" rx="40" fill="%23232f40"/%3E%3Ctext x="40" y="51" text-anchor="middle" font-size="34" fill="%23f5c542"%3E✦%3C/text%3E%3C/svg%3E';
+  $('profileDlg').showModal();
+};
+$('profilePhoto').oninput=()=>{$('profileAvatar').src=$('profilePhoto').value||''};
+$('profileSave').onclick=async()=>{
+  $('profileSave').disabled=true;
+  const {data,error}=await supabase.auth.updateUser({data:{display_name:$('profileName').value.trim(),avatar_url:$('profilePhoto').value.trim()}});
+  $('profileSave').disabled=false;
+  if(error){alert('تعذر حفظ الملف الشخصي: '+error.message);return}
+  currentUser=data.user;$('profileDlg').close();
+};
+$('profileClose').onclick=()=>$('profileDlg').close();
 applyTheme();
 render();
 initAuth();

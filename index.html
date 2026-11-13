@@ -6,6 +6,7 @@
 <title>Thunder Ai</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+#moreMenu{position:absolute;inset-inline-end:12px;top:54px;z-index:10;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px;min-width:180px;box-shadow:0 12px 30px #0006}#moreMenu button{display:block;width:100%;text-align:start;padding:10px;border-radius:8px}#moreMenu button:hover{background:var(--panel2)}.top-actions{position:relative}.plan{border:1px solid var(--line);background:var(--panel2);padding:14px;border-radius:13px;margin:12px 0;display:grid;gap:7px}.plan strong{font-size:23px;color:var(--ac)}.plan a{color:var(--ac)}.verified,.devTag{color:#e34b4b;font-weight:700}#accountIdentity{margin:12px 0;color:var(--mu)}#attachmentPreview{max-width:780px;margin:0 auto 8px;display:flex;align-items:center;gap:8px;color:var(--mu);font-size:13px}#attachmentPreview img{width:54px;height:54px;object-fit:cover;border-radius:9px}#tools{display:none!important}#theme,#exp,#imp{display:none!important}
 :root{--bg:#0d1016;--panel:#141922;--panel2:#1b212c;--line:#262e3b;--tx:#e9edf3;--mu:#8b95a5;--ac:#f2c230;--acx:#1a1400;--user:#1f2733;--code:#0a0d12}
 :root[data-theme=light]{--bg:#f6f7f9;--panel:#fff;--panel2:#eef0f4;--line:#dde1e8;--tx:#161a22;--mu:#6a7383;--ac:#d9a400;--acx:#fff;--user:#e8ebf1;--code:#f0f2f6}
 *{box-sizing:border-box;margin:0}
@@ -124,16 +125,14 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <button class="btn" id="new">محادثة جديدة</button>
   <input id="search" placeholder="بحث في المحادثات">
   <div id="list"></div>
-  <div class="foot">
-    <button id="theme">الوضع</button><button id="exp">تصدير</button><button id="imp">استيراد</button><button id="set">الإعدادات</button><button id="logout">خروج</button>
-  </div>
+  <div class="foot"><button id="set">الإعدادات العامة</button><button id="logout">تسجيل الخروج</button></div>
 </aside>
 <section id="main">
-  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button></div></div>
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
     <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option><option value="iraqi">اللهجة العراقية</option><option value="badini">الكردية البادينية</option><option value="sorani">الكردية السورانية</option></select></div>
-    <div id="box"><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
+    <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><button id="micBtn" class="toolchip">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
 </section>
@@ -147,7 +146,9 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <textarea id="s_sys"></textarea>
   <div class="row"><button class="btn" id="s_save">حفظ</button><button class="g" id="s_reset">استعادة الافتراضي</button><button class="g" id="s_close">إغلاق</button></div>
 </dialog>
-
+<dialog id="settingsV2"><h3>الإعدادات العامة</h3><p class="hint">إدارة اللغة والوضع والمظهر وسلوك المساعد.</p><label>لغة الردود</label><select id="languageV2"><option value="auto">تلقائي</option><option value="ar">العربية</option><option value="iraqi">العراقية</option><option value="badini">الكردية البادينية</option><option value="sorani">الكردية السورانية</option><option value="en">English</option><option value="tr">Türkçe</option><option value="fa">فارسی</option><option value="de">Deutsch</option><option value="fr">Français</option></select><label>وضع المساعد</label><div id="modeMount"></div><label>المظهر</label><select id="themeV2"><option value="dark">داكن</option><option value="light">فاتح</option></select><label>درجة الإبداع</label><input id="tempV2" type="number" min="0" max="2" step="0.1"><label>تعليمات مخصصة</label><textarea id="sysV2"></textarea><div class="row"><button class="btn" id="saveSettingsV2">حفظ</button><button class="g" id="closeSettingsV2">إغلاق</button></div></dialog>
+<dialog id="accountDlg"><h3>إعدادات الحساب</h3><div id="accountIdentity"></div><label>الاسم الظاهر</label><input id="profileName" maxlength="40"><label>الصورة الشخصية</label><input id="avatarInput" type="file" accept="image/*"><img id="avatarPreview" width="76" height="76" style="border-radius:50%;object-fit:cover"><h4>الخصوصية والأمان</h4><p class="hint">الدخول بالبريد وكلمة المرور فقط. لا تشارك كلمة المرور أو رموز التأكيد.</p><div class="row"><button class="btn" id="profileSave">حفظ</button><button class="g" id="accountClose">إغلاق</button></div></dialog>
+<dialog id="plansDlg"><h3>Thunder Plus</h3><p class="hint">الاشتراك والتوثيق يتم تأكيدهما يدوياً عبر تليغرام حالياً؛ لا توجد بوابة دفع آلية مفعّلة.</p><div class="plan"><b>شهري</b><strong>$5 / شهر</strong><p>طلب تفعيل مزايا Plus وتوثيق الحساب.</p><a href="https://t.me/voco96?text=مرحباً، أريد الاشتراك الشهري في Thunder AI بسعر 5 دولارات وطلب توثيق حسابي." target="_blank" rel="noopener">طلب الاشتراك عبر تليغرام</a></div><div class="plan"><b>سنوي</b><strong>$10 / سنة</strong><p>طلب تفعيل مزايا Plus السنوية.</p><a href="https://t.me/voco96?text=مرحباً، أريد الاشتراك السنوي في Thunder AI بسعر 10 دولارات وطلب توثيق حسابي." target="_blank" rel="noopener">طلب الاشتراك عبر تليغرام</a></div><div class="row"><button class="g" id="plansClose">إغلاق</button></div></dialog>
 <dialog id="memoryDlg"><h3>ذاكرة Thunder الشخصية</h3><p class="hint">هذه الملاحظات محفوظة محلياً على هذا الجهاز لهذا الحساب، وتُضاف إلى سياق محادثاتك. لا تضع كلمات مرور أو معلومات حساسة.</p><label for="memoryText">معلومات أريد من Thunder تذكّرها</label><textarea id="memoryText" placeholder="مثلاً: أفضل الإجابات المختصرة، أعمل على مشروع..."></textarea><div class="row"><button class="btn" id="memorySave">حفظ الذاكرة</button><button class="g" id="memoryClear">مسح</button><button class="g" id="memoryClose">إغلاق</button></div></dialog>
 
 <div id="authGate">
@@ -182,6 +183,7 @@ const saveQueues = new Map();
 let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cfg', {}));
 let cur = null, busy = false, ctrl = null;
 let userMemory = "";
+let pendingImage=null,pendingAudio=null,mediaRecorder=null,audioChunks=[],profileAvatar="";
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",
@@ -224,7 +226,7 @@ function persistChat(c){
     if(ce) throw ce;
 
     const rows = snapshot.msgs.map(m => ({
-      id:m.id, conversation_id:snapshot.id, user_id:ownerId, role:m.r, content:m.c
+      id:m.id, conversation_id:snapshot.id, user_id:ownerId, role:m.r, content:(m.image||m.audio)?JSON.stringify({__thunder_media__:1,text:m.c,image:m.image||null,audio:m.audio||null,mime:m.mime||null}):m.c
     }));
     if(rows.length){
       const {error: me} = await supabase.from('messages').upsert(rows, {onConflict:'id'});
@@ -249,7 +251,7 @@ async function loadCloudChats(){
   const ids = (cs || []).map(x => x.id);
   let ms = [];
   if(ids.length){ const {data,error} = await supabase.from('messages').select('id,conversation_id,role,content,created_at').in('conversation_id',ids).order('created_at',{ascending:true}); if(error) throw error; ms = data || []; }
-  chats = (cs || []).map(c => ({id:c.id,title:c.title,msgs:ms.filter(m => m.conversation_id === c.id).map(m => ({id:m.id,r:m.role,c:m.content})),t:new Date(c.updated_at || c.created_at).getTime()}));
+  chats = (cs || []).map(c => ({id:c.id,title:c.title,msgs:ms.filter(m => m.conversation_id === c.id).map(m => {let z={};try{z=JSON.parse(m.content)}catch{};return z?.__thunder_media__?{id:m.id,r:m.role,c:z.text||'',image:z.image||null,audio:z.audio||null,mime:z.mime||null}:{id:m.id,r:m.role,c:m.content}}),t:new Date(c.updated_at || c.created_at).getTime()}));
   cur = chats[0]?.id || null;
   store.set('tai_chats', chats); render();
 }
@@ -275,6 +277,7 @@ async function initAuth(){
 function memoryKey(){ return 'thunder_memory_' + (currentUser?.id || 'guest') }
 function loadMemory(){ try{ userMemory = localStorage.getItem(memoryKey()) || ''; }catch(e){ userMemory = ''; } }
 function saveMemory(){ try{ localStorage.setItem(memoryKey(), userMemory); }catch(e){} }
+const LANG_PROMPTS={ar:"أجب باللغة العربية الفصحى.",iraqi:"أجب باللهجة العراقية.",badini:"أجب بالكردية البادينية.",sorani:"أجب بالكردية السورانية.",en:"Answer in English.",tr:"Türkçe cevap ver.",fa:"به زبان فارسی پاسخ بده.",de:"Antworte auf Deutsch.",fr:"Réponds en français."};
 const MODE_PROMPTS = {
   normal: '',
   lab: '\n\nوضع مختبر القرار: حلّل المسألة من ثلاث زوايا مستقلة: (1) خبير يقترح الحل، (2) ناقد يبحث عن المخاطر والافتراضات، (3) منفّذ يحدد خطوات عملية. اختم بقرار موصى به وأسباب مختصرة. لا تدّعِ أنك شغّلت عدة نماذج؛ هذا تحليل متعدد الأدوار داخل استجابة واحدة.',
@@ -357,7 +360,7 @@ function bubble(m, i, last){
   const d = document.createElement('div');
   d.className = 'm ' + (m.r === 'user' ? 'u' : 'a');
   const b = document.createElement('div'); b.className = 'bub';
-  if(m.r === 'user') b.textContent = m.c; else b.innerHTML = md(m.c);
+  if(m.r==='user'){b.textContent=m.c||'';if(m.image){const im=document.createElement('img');im.src=m.image;im.alt='صورة مرفقة';im.style.cssText='display:block;max-width:min(320px,75vw);max-height:260px;border-radius:12px;margin-top:8px';b.appendChild(im)}if(m.audio){const au=document.createElement('div');au.textContent='🎙 تسجيل صوتي مرفق';b.appendChild(au)}}else b.innerHTML=md(m.c);
   d.appendChild(b);
   const a = document.createElement('div'); a.className = 'act';
   a.innerHTML = '<button data-a="copy">نسخ</button>' + (m.r === 'user' ? '<button data-a="edit">تعديل</button>' : (last ? '<button data-a="regen">إعادة التوليد</button>' : ''));
@@ -389,10 +392,10 @@ function setBusy(v){ busy = v; $('send').innerHTML = v ? '&#9632;' : '&#8593;' }
 
 function send(){
   if(busy){ ctrl?.abort(); return }
-  const v = $('in').value.trim(); if(!v) return;
+  const v = $('in').value.trim(); if(!v && !pendingImage && !pendingAudio) return;
   if(!cur) newChat();
   const c = getCur();
-  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v});
+  c.msgs.push({id:crypto.randomUUID(),r:'user', c:v, image:pendingImage, audio:pendingAudio?.data||null, mime:pendingAudio?.mime||null}); pendingImage=null; pendingAudio=null; updateAttachmentPreview();
   if(c.msgs.length === 1) c.title = v.slice(0, 40);
   $('in').value = ''; autosize(); save(); render(); run();
 }
@@ -410,7 +413,7 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-12).map(m => ({...m,c:(m.c || '').slice(-12000)}));
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role: m.r, content: m.c})))
+    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:(m.image||m.audio)?[{type:'text',text:m.c||'حلّل المرفق.'},...(m.image?[{type:'image_url',image_url:{url:m.image}}]:[]),...(m.audio?[{type:'audio_url',audio_url:{url:m.audio}}]:[])]:m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();
@@ -511,6 +514,23 @@ $('authForm').addEventListener('submit', async e => {
   finally{$('authSubmit').disabled=false;}
 });
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
+
+$('moreBtn').onclick=()=>{$('moreMenu').hidden=!$('moreMenu').hidden};
+function openSettingsV2(){$('moreMenu').hidden=true;$('languageV2').value=cfg.language||'auto';$('themeV2').value=cfg.theme||'dark';$('tempV2').value=cfg.temp;$('sysV2').value=cfg.sys;$('modeMount').appendChild($('mode'));$('mode').style.display='block';$('mode').style.width='100%';$('mode').style.padding='9px';$('mode').style.background='var(--panel2)';$('settingsV2').showModal()}
+$('set').onclick=$('menuSettings').onclick=openSettingsV2;
+$('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
+$('menuPlans').onclick=()=>{$('moreMenu').hidden=true;$('plansDlg').showModal()};
+$('saveSettingsV2').onclick=()=>{cfg.language=$('languageV2').value;cfg.theme=$('themeV2').value;cfg.temp=Math.max(0,Math.min(2,Number($('tempV2').value)||.7));cfg.sys=$('sysV2').value.trim()||DEF_SYS;cfg.mode=$('mode').value;saveCfg();applyTheme();$('settingsV2').close()};
+$('closeSettingsV2').onclick=()=>$('settingsV2').close();$('plansClose').onclick=()=>$('plansDlg').close();$('accountClose').onclick=()=>$('accountDlg').close();
+function openAccountV2(){const name=currentUser?.user_metadata?.display_name||(currentUser?.email||'').split('@')[0];$('profileName').value=name;$('accountIdentity').innerHTML=esc(currentUser?.email||'')+((currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com'?' <span class="devTag">المطور</span> <span class="verified">✓ موثّق</span>':'');try{profileAvatar=localStorage.getItem('thunder_avatar_'+currentUser.id)||''}catch{}$('avatarPreview').src=profileAvatar;$('accountDlg').showModal()}
+$('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
+$('avatarInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,256/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);profileAvatar=c.toDataURL('image/jpeg',.72);$('avatarPreview').src=profileAvatar;URL.revokeObjectURL(url)};im.src=url};
+$('profileSave').onclick=async()=>{const name=$('profileName').value.trim();if(!name){alert('اكتب اسماً صحيحاً');return}const {error}=await supabase.from('profiles').upsert({id:currentUser.id,display_name:name},{onConflict:'id'});if(error){alert('تعذر حفظ الاسم: '+error.message);return}const {error:ue}=await supabase.auth.updateUser({data:{display_name:name}});if(ue){alert('تعذر تحديث الاسم: '+ue.message);return}try{localStorage.setItem('thunder_avatar_'+currentUser.id,profileAvatar)}catch{}$('accountDlg').close()};
+function updateAttachmentPreview(){const p=$('attachmentPreview');p.innerHTML='';p.hidden=!(pendingImage||pendingAudio);if(pendingImage){const im=document.createElement('img');im.src=pendingImage;p.appendChild(im)}if(pendingAudio){const t=document.createElement('span');t.textContent='تسجيل صوتي جاهز';p.appendChild(t)}if(!p.hidden){const x=document.createElement('button');x.textContent='إزالة';x.onclick=()=>{pendingImage=null;pendingAudio=null;updateAttachmentPreview()};p.appendChild(x)}}
+$('attachBtn').onclick=()=>$('imageInput').click();
+$('imageInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>12*1024*1024){alert('الصورة أكبر من 12MB');return}const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);pendingImage=c.toDataURL('image/jpeg',.75);URL.revokeObjectURL(url);updateAttachmentPreview()};im.src=url;e.target.value=''};
+$('micBtn').onclick=async()=>{if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('micBtn').textContent='🎙';return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true}),mt=MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':(MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'');mediaRecorder=new MediaRecorder(stream,mt?{mimeType:mt}:undefined);audioChunks=[];mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};mediaRecorder.onstop=async()=>{const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(t=>t.stop());if(blob.size>5*1024*1024){alert('التسجيل تجاوز 5MB');return}const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(blob)});pendingAudio={data,mime:blob.type};updateAttachmentPreview()};mediaRecorder.start();$('micBtn').textContent='■ إيقاف'}catch(e){alert('اسمح للمتصفح باستخدام الميكروفون ثم حاول مجدداً')}};
+
 applyTheme();
 render();
 initAuth();

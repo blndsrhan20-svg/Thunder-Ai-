@@ -276,7 +276,9 @@ async function initAuth(){
   $('authGate').style.display = 'flex';
   supabase.auth.onAuthStateChange((event) => {
     if(event === 'SIGNED_OUT'){
-      if(communityChannel){supabase.removeChannel(communityChannel);communityChannel=null;}\n      communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;\n      currentUser=null; currentSession=null; chats=[]; cur=null;
+      if(communityChannel){supabase.removeChannel(communityChannel);communityChannel=null;}
+      communityMessages=[];$('communityView').hidden=true;$('msgs').hidden=false;$('bar').hidden=false;
+      currentUser=null; currentSession=null; chats=[]; cur=null;
       render(); $('authGate').style.display='flex';
     }
   });

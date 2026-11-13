@@ -91,7 +91,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #send:active{transform:scale(.94)}
 #authGate{background:radial-gradient(ellipse at 50% 15%,#49370d55,transparent 48%),#080b10f2;backdrop-filter:blur(14px)}
 #authCard{border-radius:24px;padding:30px;background:linear-gradient(145deg,var(--panel),#111722);border-color:#f2c23055;box-shadow:0 24px 90px #0009}
-#authCard h2{font-size:29px;letter-spacing:.3px}
+#authCard h2{font-size:29px;letter-spacing:.3px}.authBadge{display:inline-block;color:var(--ac);font-size:11px;letter-spacing:1.4px;border:1px solid #f2c23055;border-radius:20px;padding:5px 10px;margin:0 0 14px}
 #authCard h2:before{content:"⚡";color:var(--ac);margin-inline-end:9px}
 #authCard input{min-height:46px}
 #authActions button{min-height:44px}
@@ -131,7 +131,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
-    <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option><option value="iraqi">اللهجة العراقية</option><option value="badini">الكردية البادينية</option><option value="sorani">الكردية السورانية</option></select></div>
+    <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option></select></div>
     <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><button id="micBtn" class="toolchip">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
@@ -153,7 +153,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 
 <div id="authGate">
   <div id="authCard">
-    <h2>Thunder Ai</h2>
+    <h2>Thunder Ai</h2><div class="authBadge">THUNDER AI · مساعدك الذكي</div>
     <p id="authIntro">سجّل دخولك لحفظ محادثاتك ومزامنتها بأمان.</p>
     <form id="authForm">
       <label for="authEmail">البريد الإلكتروني</label>
@@ -505,13 +505,13 @@ $('authForm').addEventListener('submit', async e => {
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
 
 $('moreBtn').onclick=()=>{$('moreMenu').hidden=!$('moreMenu').hidden};
-function openSettingsV2(){$('moreMenu').hidden=true;$('languageV2').value=cfg.language||'auto';$('themeV2').value=cfg.theme||'dark';$('tempV2').value=cfg.temp;$('sysV2').value=cfg.sys;$('modeMount').appendChild($('mode'));$('mode').style.display='block';$('mode').style.width='100%';$('mode').style.padding='9px';$('mode').style.background='var(--panel2)';$('settingsV2').showModal()}
+function openSettingsV2(){$('moreMenu').hidden=true;$('side').classList.remove('open');$('languageV2').value=cfg.language||'auto';$('themeV2').value=cfg.theme||'dark';$('tempV2').value=cfg.temp;$('sysV2').value=cfg.sys;$('modeMount').appendChild($('mode'));$('mode').style.display='block';$('mode').style.width='100%';$('mode').style.padding='9px';$('mode').style.background='var(--panel2)';$('settingsV2').showModal()}
 $('set').onclick=$('menuSettings').onclick=openSettingsV2;
 $('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
 $('menuPlans').onclick=()=>{$('moreMenu').hidden=true;$('plansDlg').showModal()};
 $('saveSettingsV2').onclick=()=>{cfg.language=$('languageV2').value;cfg.theme=$('themeV2').value;cfg.temp=Math.max(0,Math.min(2,Number($('tempV2').value)||.7));cfg.sys=$('sysV2').value.trim()||DEF_SYS;cfg.mode=$('mode').value;saveCfg();applyTheme();$('settingsV2').close()};
 $('closeSettingsV2').onclick=()=>$('settingsV2').close();$('plansClose').onclick=()=>$('plansDlg').close();$('accountClose').onclick=()=>$('accountDlg').close();
-function openAccountV2(){const dev=(currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com';const name=currentUser?.user_metadata?.display_name||(dev?'بلند إدريس سرحان':(currentUser?.email||'').split('@')[0]);$('profileName').value=name;$('accountIdentity').innerHTML=esc(name)+' · '+esc(currentUser?.email||'')+((currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com'?' <span class="devTag">المطور</span> <span class="verified">✓ موثّق</span>':'');try{profileAvatar=localStorage.getItem('thunder_avatar_'+currentUser.id)||''}catch{}$('avatarPreview').src=profileAvatar;$('accountDlg').showModal()}
+function openAccountV2(){const dev=(currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com';const name=currentUser?.user_metadata?.display_name||(dev?'بلند إدريس سرحان':(currentUser?.email||'').split('@')[0]);$('profileName').value=name;$('accountIdentity').innerHTML=esc(name)+' · '+esc(currentUser?.email||'')+((currentUser?.email||'').toLowerCase()==='blndsrhan10@gmail.com'?' <span class="verified">بلند إدريس سرحان</span> <span class="devTag">المطور · ✓ موثّق</span>':'');try{profileAvatar=localStorage.getItem('thunder_avatar_'+currentUser.id)||''}catch{}$('avatarPreview').src=profileAvatar;$('accountDlg').showModal()}
 $('menuAccount').onclick=()=>{$('moreMenu').hidden=true;openAccountV2()};
 $('resetPassword').onclick=async()=>{const {error}=await supabase.auth.resetPasswordForEmail(currentUser.email,{redirectTo:location.origin});alert(error?'تعذر إرسال رابط تغيير كلمة المرور: '+error.message:'تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني.')};
 $('securityLogout').onclick=async()=>{await supabase.auth.signOut();$('accountDlg').close()};

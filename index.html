@@ -138,7 +138,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
   <section id="communityView" hidden aria-label="مجتمع ثاندر">
-    <div class="community-head"><h2>⚡ مجتمع ثاندر</h2><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div id="communityStatus">الدردشة العامة</div></div>
+    <div class="community-head"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚡ مجتمع ثاندر</h2><button id="communityBack" class="toolchip" type="button">رجوع للمساعد</button></div><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div id="communityStatus">الدردشة العامة</div></div>
     <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
     <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
   </section>
@@ -527,6 +527,7 @@ async function run(){
 function autosize(){ const t = $('in'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px' }
 
 $('communityOpen').onclick=()=>openCommunity();
+$('communityBack').onclick=()=>closeCommunity();
 $('communityComposer').addEventListener('submit',sendCommunityMessage);
 $('communityInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('communityComposer').requestSubmit()}});
 $('communityInput').addEventListener('input',()=>{$('communityInput').style.height='auto';$('communityInput').style.height=Math.min($('communityInput').scrollHeight,130)+'px'});

@@ -24,6 +24,13 @@ function normalizeContent(value: unknown): string | Array<Record<string, unknown
         parts.push({ type: "image_url", image_url: { url: image } });
       }
     }
+    if (p.type === "audio_url" && p.audio_url && typeof p.audio_url === "object") {
+      const audio = (p.audio_url as Record<string, unknown>).url;
+      const match = typeof audio === "string" ? audio.match(/^data:(audio\/(?:webm|mp4|ogg|wav|mpeg|mp3));base64,([A-Za-z0-9+/=]+)$/i) : null;
+      if (match && match[0].length <= 7_000_000) {
+        parts.push({ type: "audio", mimeType: match[1].toLowerCase(), data: match[2] });
+      }
+    }
   }
   return parts;
 }
@@ -61,6 +68,50 @@ Deno.serve(async (req: Request) => {
       const role = m?.role === "assistant" ? "assistant" : m?.role === "system" ? "system" : "user";
       return { role, content: normalizeContent(m?.content) };
     }).filter((m: any) => typeof m.content === "string" ? m.content.length > 0 : m.content.length > 0);
+
+    const containsAudio = messages.some((m: any) =>
+      Array.isArray(m.content) && m.content.some((p: any) => p?.type === "audio" && typeof p.data === "string")
+    );
+    if (containsAudio) {
+      const systemText = messages.filter((m: any) => m.role === "system")
+        .map((m: any) => typeof m.content === "string" ? m.content : "").join("\n");
+      const contents = messages.filter((m: any) => m.role !== "system").map((m: any) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: (Array.isArray(m.content) ? m.content : [{ type: "text", text: m.content }]).map((p: any) => {
+          if (p.type === "text") return { text: p.text };
+          if (p.type === "image_url") {
+            const raw = p.image_url?.url || "";
+            const match = raw.match(/^data:(image\/(?:png|jpeg|webp|gif));base64,(.+)$/i);
+            return match ? { inlineData: { mimeType: match[1], data: match[2] } } : { text: "[صورة مرفقة]" };
+          }
+          if (p.type === "audio") return { inlineData: { mimeType: p.mimeType, data: p.data } };
+          return { text: "" };
+        }).filter((p: any) => p.text !== "")
+      }));
+      const audioResponse = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + encodeURIComponent(apiKey),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: systemText ? { parts: [{ text: systemText }] } : undefined,
+            contents,
+            generationConfig: { temperature: Math.max(0, Math.min(2, Number(input.temperature ?? 0.7))), maxOutputTokens: 4096 },
+          }),
+          signal: req.signal,
+        },
+      );
+      if (!audioResponse.ok) {
+        const detail = (await audioResponse.text()).slice(0, 1200);
+        return new Response(JSON.stringify({ error: "Gemini audio request failed", detail }), {
+          status: audioResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const result = await audioResponse.json();
+      const answer = (result.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || "").join("");
+      const event = "data: " + JSON.stringify({ choices: [{ delta: { content: answer } }] }) + "\n\ndata: [DONE]\n\n";
+      return new Response(event, { status: 200, headers: { ...corsHeaders, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
+    }
 
     // Route short everyday requests to Flash-Lite for lower latency; keep Flash for complex work.
     const lastUser = [...messages].reverse().find((m: any) => m.role === "user");

@@ -117,6 +117,8 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 #authActions{display:flex;gap:8px;margin-top:16px}#authActions button{flex:1}
 #authMsg{font-size:13px;color:var(--ac);min-height:22px;margin-top:10px;line-height:1.6}
 #logout{color:var(--mu)}
+
+#communityView{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--bg)}#communityView[hidden]{display:none}.community-head{padding:18px;border-bottom:1px solid var(--line);background:var(--panel)}.community-head h2{font-size:21px;margin-bottom:4px}.community-head p,#communityStatus{color:var(--mu);font-size:13px}#communityStatus{margin-top:8px}#communityFeed{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.community-empty{margin:auto;text-align:center;color:var(--mu);line-height:1.9;padding:24px}.community-msg{max-width:min(760px,100%);width:100%;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.community-msg.mine{border-color:#f2c23066}.community-meta{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:12px;margin-bottom:6px}.community-meta strong{color:var(--ac);font-size:14px}.community-content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:15px}.community-actions{display:flex;gap:8px;margin-top:7px}.community-actions button{font-size:11px;color:var(--mu);padding:3px 7px;border-radius:6px}#communityComposer{display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel)}#communityInput{flex:1;min-width:0;max-height:130px;resize:none;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px;line-height:1.6}#communitySend{background:var(--ac);color:var(--acx);font-weight:700;border-radius:11px;padding:11px 16px;min-height:44px}#communityOpen{white-space:nowrap}@media(max-width:760px){#communityOpen{font-size:11px;padding:7px 8px}.community-head{padding:14px}.community-msg{padding:10px 12px}#communityFeed{padding:12px}}
 </style>
 </head>
 <body>
@@ -128,13 +130,18 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
   <div class="foot"><button id="set">الإعدادات العامة</button><button id="logout">تسجيل الخروج</button></div>
 </aside>
 <section id="main">
-  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
+  <div id="top"><button id="menu" aria-label="القائمة">&#9776;</button><b id="title">محادثة جديدة</b><div class="top-actions"><button id="communityOpen" class="toolchip">مجتمع ثاندر</button><button id="memoryBtn">ذاكرتي</button><button id="moreBtn" class="toolchip">⋯</button><div id="moreMenu" hidden><button id="menuSettings">الإعدادات العامة</button><button id="menuAccount">إعدادات الحساب</button><button id="menuPlans">الاشتراك والتوثيق</button></div></div></div>
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <div id="bar">
     <div id="tools"><select id="mode" aria-label="وضع Thunder"><option value="normal">المساعد العام</option><option value="lab">مختبر القرار – تحليل بثلاث زوايا</option><option value="verify">مدقق المعلومات – تحقق ودرجة ثقة</option><option value="project">تحويل الفكرة إلى مشروع</option></select></div>
     <div id="attachmentPreview" hidden></div><div id="box"><button id="attachBtn" class="toolchip">＋</button><input id="imageInput" type="file" accept="image/*" hidden><button id="micBtn" class="toolchip">🎙</button><textarea id="in" rows="1" placeholder="اكتب رسالتك هنا"></textarea><button id="send" aria-label="إرسال">&#8593;</button></div>
     <div id="note">محادثاتك تُحفظ تلقائياً في حسابك على Thunder AI.</div>
   </div>
+  <section id="communityView" hidden aria-label="مجتمع ثاندر">
+    <div class="community-head"><h2>⚡ مجتمع ثاندر</h2><p>مساحة عامة للنقاش وتبادل الأفكار باحترام.</p><div id="communityStatus">الدردشة العامة</div></div>
+    <div id="communityFeed" aria-live="polite"><div class="community-empty">جارٍ تحميل الرسائل…</div></div>
+    <form id="communityComposer"><textarea id="communityInput" rows="1" maxlength="1000" placeholder="اكتب رسالة للمجتمع…" aria-label="رسالتك للمجتمع"></textarea><button id="communitySend" type="submit">إرسال</button></form>
+  </section>
 </section>
 
 <dialog id="dlg">
@@ -184,6 +191,7 @@ let cfg = Object.assign({temp:0.7, sys:DEF_SYS, theme:'dark'}, store.get('tai_cf
 let cur = null, busy = false, ctrl = null;
 let userMemory = "";
 let pendingImage=null,pendingAudio=null,mediaRecorder=null,audioChunks=[],profileAvatar="";
+let communityChannel=null, communityMessages=[];
 
 const SUG = [
   "اشرح لي مفهوم الذكاء الاصطناعي بأسلوب مبسط",

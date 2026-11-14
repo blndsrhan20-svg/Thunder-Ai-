@@ -96,3 +96,21 @@ export async function loadNotifications(userId){
  if(profiles.error)throw profiles.error;
  return rows.map(n=>({...n,actor:(profiles.data||[]).find(p=>p.id===n.actor_id)||null}));
 }
+
+export async function markNotificationsRead(userId){
+ const {error}=await supabase.from("notifications").update({is_read:true}).eq("recipient_id",userId).eq("is_read",false);
+ if(error)throw error;
+}
+export async function loadPublicProfile(targetId,currentUserId){
+ const [profile,posts,followers,following,relation]=await Promise.all([
+  supabase.from("profiles").select("id,username,display_name,bio,avatar_path,website,user_code").eq("id",targetId).single(),
+  supabase.from("posts").select("id,user_id,caption,media_path,media_type,created_at").eq("user_id",targetId).order("created_at",{ascending:false}).limit(30),
+  supabase.from("user_follows").select("follower_id",{count:"exact",head:true}).eq("following_id",targetId),
+  supabase.from("user_follows").select("following_id",{count:"exact",head:true}).eq("follower_id",targetId),
+  targetId===currentUserId?Promise.resolve({data:null,error:null}):supabase.from("user_follows").select("follower_id").eq("follower_id",currentUserId).eq("following_id",targetId).maybeSingle()
+ ]);
+ for(const r of [profile,posts,followers,following,relation])if(r.error)throw r.error;
+ const rows=posts.data||[];
+ const urls=await Promise.all(rows.map(p=>p.media_path?mediaUrl(p.media_path):null));
+ return {profile:profile.data,posts:rows.map((p,i)=>({...p,media_url:urls[i]})),postCount:posts.data?.length||0,followers:followers.count||0,following:following.count||0,isFollowing:!!relation.data};
+}

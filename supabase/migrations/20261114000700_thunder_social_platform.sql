@@ -181,3 +181,56 @@ begin
     end if;
   end if;
 end $$;
+
+
+-- Generate notifications only from authenticated user actions already protected by RLS.
+create or replace function public.thunder_notify_follow()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+begin
+  insert into public.notifications(recipient_id,actor_id,kind)
+  values(new.following_id,new.follower_id,'follow')
+  on conflict do nothing;
+  return new;
+end;
+$$;
+revoke all on function public.thunder_notify_follow() from public,anon,authenticated;
+drop trigger if exists thunder_follow_notification on public.user_follows;
+create trigger thunder_follow_notification after insert on public.user_follows
+for each row execute function public.thunder_notify_follow();
+
+create or replace function public.thunder_notify_post_like()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+declare owner_id uuid;
+begin
+  select p.user_id into owner_id from public.posts p where p.id=new.post_id;
+  if owner_id is not null and owner_id<>new.user_id then
+    insert into public.notifications(recipient_id,actor_id,kind,post_id)
+    values(owner_id,new.user_id,'like',new.post_id);
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.thunder_notify_post_like() from public,anon,authenticated;
+drop trigger if exists thunder_post_like_notification on public.post_likes;
+create trigger thunder_post_like_notification after insert on public.post_likes
+for each row execute function public.thunder_notify_post_like();
+
+create or replace function public.thunder_notify_comment()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+declare owner_id uuid;
+begin
+  select p.user_id into owner_id from public.posts p where p.id=new.post_id;
+  if owner_id is not null and owner_id<>new.user_id then
+    insert into public.notifications(recipient_id,actor_id,kind,post_id,comment_id)
+    values(owner_id,new.user_id,'comment',new.post_id,new.id);
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.thunder_notify_comment() from public,anon,authenticated;
+drop trigger if exists thunder_post_comment_notification on public.post_comments;
+create trigger thunder_post_comment_notification after insert on public.post_comments
+for each row execute function public.thunder_notify_comment();

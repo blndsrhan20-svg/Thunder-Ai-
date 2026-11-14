@@ -159,6 +159,24 @@ drop trigger if exists thunder_group_message_touch on public.group_messages;
 create trigger thunder_group_message_touch after insert on public.group_messages
 for each row execute function public.touch_thunder_group_updated_at();
 
+
+-- Prevent anonymous Supabase Auth sessions from using Messenger group features.
+do $
+declare t text;
+begin
+  foreach t in array array['group_conversations','group_members','group_messages','group_message_reads','group_message_reactions'] loop
+    execute format('drop policy if exists %I on public.%I',t||'_permanent_users_only',t);
+    execute format('create policy %I on public.%I as restrictive for all to authenticated using (((select auth.jwt()->>''is_anonymous''))::boolean is false) with check (((select auth.jwt()->>''is_anonymous''))::boolean is false)',t||'_permanent_users_only',t);
+  end loop;
+end $;
+drop policy if exists thunder_chat_images_permanent_users_only on storage.objects;
+create policy thunder_chat_images_permanent_users_only on storage.objects as restrictive
+for all to authenticated using (
+  bucket_id <> 'thunder-chat-images' or (((select auth.jwt()->>'is_anonymous'))::boolean is false)
+) with check (
+  bucket_id <> 'thunder-chat-images' or (((select auth.jwt()->>'is_anonymous'))::boolean is false)
+);
+
 -- Extend the existing private chat image bucket policies to cover group members.
 drop policy if exists thunder_chat_images_read_member on storage.objects;
 create policy thunder_chat_images_read_member on storage.objects

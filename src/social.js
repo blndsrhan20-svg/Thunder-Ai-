@@ -128,3 +128,13 @@ export async function uploadAvatar(userId,file){
  if(saved.error){await supabase.storage.from("thunder-social-media").remove([path]);throw saved.error}
  return {path,url:await mediaUrl(path)};
 }
+
+export function watchSocial(userId,onChange){
+ return supabase.channel("thunder-social-"+userId)
+  .on("postgres_changes",{event:"*",schema:"public",table:"posts"},onChange)
+  .on("postgres_changes",{event:"*",schema:"public",table:"post_likes"},onChange)
+  .on("postgres_changes",{event:"*",schema:"public",table:"post_comments"},onChange)
+  .on("postgres_changes",{event:"*",schema:"public",table:"stories"},onChange)
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"recipient_id=eq."+userId},onChange)
+  .subscribe();
+}

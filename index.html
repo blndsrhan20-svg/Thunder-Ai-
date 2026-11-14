@@ -489,8 +489,12 @@ $('authToggle').onclick = () => {
   $('authPassword').autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
   $('authMsg').textContent = '';
 };
+let authSubmitting = false;
 $('authForm').addEventListener('submit', async e => {
-  e.preventDefault(); $('authSubmit').disabled = true; $('authMsg').textContent = 'جارٍ تنفيذ الطلب...';
+  e.preventDefault();
+  if(authSubmitting) return;
+  authSubmitting = true;
+  $('authSubmit').disabled = true; $('authMsg').textContent = 'جارٍ تنفيذ الطلب...';
   const email = $('authEmail').value.trim(), password = $('authPassword').value;
   try{
     if(authMode === 'signup'){
@@ -504,8 +508,18 @@ $('authForm').addEventListener('submit', async e => {
       const {data,error} = await supabase.auth.signInWithPassword({email,password});
       if(error) throw error; await enterAccount(data.session);
     }
-  }catch(err){ $('authMsg').textContent = err.message || 'حدث خطأ.'; }
-  finally{$('authSubmit').disabled=false;}
+  }catch(err){
+    const code = String(err.code || err.error_code || '');
+    const detail = String(err.message || '');
+    if(code === 'over_email_send_rate_limit' || /email rate limit exceeded/i.test(detail)){
+      $('authMsg').textContent = 'وصل حد إرسال رسائل التأكيد في Supabase. خدمة البريد الافتراضية تسمح برسالتين فقط في الساعة للمشروع. جرّب لاحقاً؛ وللسماح للجميع بإنشاء حسابات، يجب ربط خدمة SMTP مخصصة في Supabase.';
+    }else if(code === 'email_address_not_authorized'){
+      $('authMsg').textContent = 'خدمة البريد الافتراضية في Supabase لا ترسل إلا لعناوين فريق المشروع. يلزم ربط SMTP مخصص حتى يتمكن الجميع من التسجيل.';
+    }else{
+      $('authMsg').textContent = detail || 'حدث خطأ أثناء المصادقة.';
+    }
+  }
+  finally{authSubmitting=false;$('authSubmit').disabled=false;}
 });
 $('logout').onclick = async () => { if(confirm('تسجيل الخروج؟')) await supabase.auth.signOut(); };
 

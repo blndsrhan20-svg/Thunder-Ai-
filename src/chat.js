@@ -70,3 +70,18 @@ export async function toggleGroupReaction(messageId,userId,emoji){
 }
 
 export const getGroupReactions=async ids=>{if(!ids.length)return[];const r=await supabase.from("group_message_reactions").select("message_id,user_id,emoji").in("message_id",ids);if(r.error)throw r.error;return r.data||[]};
+
+export async function sendVoiceMessage(kind,conversationId,userId,file){
+ const allowed=["audio/mp4","audio/webm","audio/ogg","audio/mpeg","audio/aac"];
+ if(!allowed.includes(file.type))throw new Error("صيغة التسجيل الصوتي غير مدعومة على هذا الجهاز");
+ if(file.size>25*1024*1024)throw new Error("التسجيل أكبر من 25 ميغابايت");
+ const ext=({"audio/mp4":"m4a","audio/webm":"webm","audio/ogg":"ogg","audio/mpeg":"mp3","audio/aac":"aac"})[file.type]||"m4a";
+ const path=conversationId+"/"+userId+"/"+crypto.randomUUID()+"."+ext;
+ const uploaded=await supabase.storage.from("thunder-chat-images").upload(path,file,{contentType:file.type,upsert:false});
+ if(uploaded.error)throw uploaded.error;
+ const table=kind==="group"?"group_messages":"direct_messages";
+ const row=kind==="group"?{group_id:conversationId,sender_id:userId,content:"",audio_path:path}:{conversation_id:conversationId,sender_id:userId,content:"",audio_path:path};
+ const inserted=await supabase.from(table).insert(row).select().single();
+ if(inserted.error){await supabase.storage.from("thunder-chat-images").remove([path]);throw inserted.error}
+ return inserted.data;
+}

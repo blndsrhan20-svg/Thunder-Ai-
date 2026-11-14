@@ -90,3 +90,13 @@ begin
     end if;
   end if;
 end $$;
+
+-- Anonymous Auth sessions are not permitted to use the enhanced direct-message features.
+do $$
+declare t text;
+begin
+  foreach t in array array['direct_message_reads','direct_message_reactions'] loop
+    execute format('drop policy if exists %I on public.%I',t||'_permanent_users_only',t);
+    execute format('create policy %I on public.%I as restrictive for all to authenticated using (((select auth.jwt()->>''is_anonymous''))::boolean is false) with check (((select auth.jwt()->>''is_anonymous''))::boolean is false)',t||'_permanent_users_only',t);
+  end loop;
+end $$;

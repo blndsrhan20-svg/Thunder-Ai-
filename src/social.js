@@ -109,8 +109,8 @@ export async function loadPublicProfile(targetId,currentUserId){
   supabase.from("user_follows").select("following_id",{count:"exact",head:true}).eq("follower_id",targetId),
   targetId===currentUserId?Promise.resolve({data:null,error:null}):supabase.from("user_follows").select("follower_id").eq("follower_id",currentUserId).eq("following_id",targetId).maybeSingle()
  ]);
- for(const r of [profile,posts,followers,following,relation])if(r.error)throw r.error;
+ for(const r of [profile,posts,postCount,followers,following,relation])if(r.error)throw r.error;
  const rows=posts.data||[];
  const urls=await Promise.all(rows.map(p=>p.media_path?mediaUrl(p.media_path):null));
- return {profile:profile.data,posts:rows.map((p,i)=>({...p,media_url:urls[i]})),postCount:posts.data?.length||0,followers:followers.count||0,following:following.count||0,isFollowing:!!relation.data};
+ return {profile:profile.data,posts:rows.map((p,i)=>({...p,media_url:urls[i]})),postCount:postCount.count||0,followers:followers.count||0,following:following.count||0,isFollowing:!!relation.data};
 }

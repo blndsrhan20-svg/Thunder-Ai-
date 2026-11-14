@@ -55,8 +55,8 @@ $('authForm').addEventListener('submit',async e=>{
   if(authMode==='signup'){
    const {data,error}=await supabase.auth.signUp({email,password});if(error)throw error;
    if(data.session)await supabase.auth.signOut();
-   $('authMsg').textContent=data.session?'تم إنشاء الحساب. سجّل الدخول الآن بالبريد وكلمة المرور.':'تم إرسال طلب إنشاء الحساب. إذا كان تأكيد البريد مفعّلاً، أكّد بريدك ثم سجّل الدخول.';
    setAuthMode('login');
+   $('authMsg').textContent=data.session?'تم إنشاء الحساب. سجّل الدخول الآن بالبريد وكلمة المرور.':'تم إرسال طلب إنشاء الحساب. إذا كان تأكيد البريد مفعّلاً، أكّد بريدك ثم سجّل الدخول.';
   }else{
    const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
    await enterAccount(data.session);
@@ -180,11 +180,6 @@ async function startConversation(target){
 }
 $('logoutBtn').addEventListener('click',async()=>{if(!confirm('تريد تسجيل الخروج؟'))return;if(channel)await supabase.removeChannel(channel);await supabase.auth.signOut();user=null;profile=null;conversations=[];activeId=null;showWelcome();$('chatList').innerHTML='<div class="empty-list">سجّل الدخول لعرض محادثاتك.</div>';$('authLayer').style.display='grid';setAuthMode('login')});
 $('aiBtn').addEventListener('click',()=>location.href='/ai');
-(async()=>{
- $('authLayer').style.display='grid';$('messageInput').disabled=true;
- try{
-  const {data}=await supabase.auth.getSession();if(data.session)await supabase.auth.signOut();
- }catch(e){}
-})();
+$('authLayer').style.display='grid';$('messageInput').disabled=true;
 </script>
 </body></html>

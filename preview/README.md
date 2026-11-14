@@ -1,22 +1,28 @@
-# Thunder Messenger — Phase 1 UI Preview
+# Thunder Messenger — المرحلة الأولى (ربط فعلي)
 
-This folder contains an isolated, static UI prototype for reviewing the first Messenger screen.
+## ما أُضيف
+- `messenger.html`: واجهة مراسلة عربية RTL مرتبطة مباشرة بمشروع Supabase الحالي.
+- `server.js`: الصفحة الرئيسية `/` تعرض Messenger، والمسار `/ai` يبقي تطبيق Thunder AI السابق متاحاً.
+- تسجيل حساب بالبريد وكلمة المرور، مع عدم تسجيل الدخول تلقائياً بعد إنشاء الحساب.
+- ملف شخصي باسم ظاهر واسم مستخدم فريد، مع رقم Thunder الذي يولّده العمود الموجود في قاعدة البيانات.
+- البحث عن المستخدمين وبدء محادثة خاصة.
+- إرسال واستقبال الرسائل الحقيقية عبر `direct_conversations` و`direct_messages`.
+- تحديث فوري للرسائل عبر Supabase Realtime.
+- فحص الصلاحيات يتم عبر سياسات RLS الموجودة في قاعدة البيانات.
 
-## Open the preview
-Open `messenger-preview.html` in a browser. It is responsive for desktop and mobile.
+## قاعدة البيانات
+تم فحص الجداول والسياسات والفهارس الموجودة. التطبيق يستخدم:
+- `profiles`
+- `direct_conversations`
+- `direct_messages`
 
-## Prototype behavior
-- Switch between sample conversations.
-- Search the sample conversation list.
-- Filter all, unread, and online sample chats.
-- Type and append local demo messages.
+لم تُنفذ أي تغييرات على المخطط أو السياسات أو البيانات. ترتيب معرفَي المشاركين قبل إنشاء المحادثة يطابق الفهرس الفريد الموجود على `(member_one, member_two)`.
 
-## Important boundaries
-- All names and messages in this preview are fictional demo data.
-- The composer does not send messages to Supabase or any server.
-- No authentication, database, storage, Realtime, or production code is changed.
-- The existing `index.html`, `server.js`, Supabase schema, users, secrets, and Railway deployment are untouched.
-- This is a visual/interaction prototype only, not a functioning messaging service.
+## الحفاظ على Thunder AI
+الملف الأصلي `index.html` لم يُستبدل؛ أصبح متاحاً عبر `/ai`. لا تُحذف محادثات الذكاء الاصطناعي أو حساباته.
 
-## Next review step
-After approval, the next phase can replace the current AI-first screen in a separate proposed change, integrating the existing direct-message tables only after their exact schema, RLS policies, and user/profile relationships are fully reviewed.
+## حدود هذه النسخة
+- لا توجد حالياً مكالمات صوتية/فيديو أو إرسال ملفات وصور أو مجموعات.
+- لا توجد مؤشرات كتابة أو حالة اتصال Presence.
+- لا توجد مزامنة إشعارات Push.
+- لم يُجرَ نشر إلى Railway من هذا الفرع حتى الآن.

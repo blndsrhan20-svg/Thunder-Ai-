@@ -95,3 +95,5 @@
 .public-post-thumb,.public-post-text{width:100%;aspect-ratio:1;object-fit:cover;background:#151515;border:1px solid #333;border-radius:5px}
 .public-post-text{padding:8px;overflow:hidden;font-size:10px;color:#ccc;line-height:1.6}
 .read-receipt{display:block;text-align:left;color:#888;font-size:9px;margin-top:3px}
+
+.avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}

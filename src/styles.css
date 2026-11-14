@@ -80,3 +80,18 @@
  .post-create-card{padding:11px}
  .post-card{padding:11px}
 }
+
+.dialog-card textarea{width:100%;resize:vertical;min-height:80px;margin:8px 0;padding:12px;background:#111;border:1px solid #303030;border-radius:10px;color:#fff;font:inherit}
+.dialog-card label{display:block;margin:10px 0 4px;color:#ccc;font-size:11px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 0;margin:10px 0;border-block:1px solid #252525}
+.profile-stats span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.profile-stats b{font-size:17px}
+.profile-stats small{font-size:10px;color:#888}
+.profile-bio{font-size:12px;color:#ccc;line-height:1.9;white-space:pre-wrap}
+.public-profile-head{display:flex;align-items:center;gap:13px;margin:8px 0}
+.public-profile-head h2{margin:0}
+.public-avatar{width:58px;height:58px;flex-basis:58px}
+.public-post-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:16px}
+.public-post-thumb,.public-post-text{width:100%;aspect-ratio:1;object-fit:cover;background:#151515;border:1px solid #333;border-radius:5px}
+.public-post-text{padding:8px;overflow:hidden;font-size:10px;color:#ccc;line-height:1.6}
+.read-receipt{display:block;text-align:left;color:#888;font-size:9px;margin-top:3px}

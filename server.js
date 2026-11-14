@@ -16,7 +16,7 @@ http.createServer(async (req,res) => {
     }
     let requested = pathname;
     if (pathname === "/" || pathname === "/index.html") requested = "/messenger.html";
-    else if (pathname === "/ai" || pathname === "/ai/") requested = "/index.html";
+    else if (pathname === "/ai" || pathname === "/ai/" || pathname === "/index.html") requested = "/messenger.html";
     let file = normalize(join(root, requested));
     if (!file.startsWith(root + "/") && file !== root) throw new Error("Invalid path");
     let data;

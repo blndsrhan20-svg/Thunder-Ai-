@@ -53,15 +53,15 @@ create table if not exists public.group_message_reactions (
 
 create or replace function public.is_thunder_group_member(p_group_id uuid,p_user_id uuid)
 returns boolean language sql stable security definer set search_path=''
-as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id) $;
+as $fn$ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id) $fn$;
 create or replace function public.is_thunder_group_admin(p_group_id uuid,p_user_id uuid)
 returns boolean language sql stable security definer set search_path=''
-as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id and gm.role in ('owner','admin')) $;
+as $fn$ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id and gm.role in ('owner','admin')) $fn$;
 revoke all on function public.is_thunder_group_member(uuid,uuid) from public,anon;
 revoke all on function public.is_thunder_group_admin(uuid,uuid) from public,anon;
 create or replace function public.is_thunder_group_owner(p_group_id uuid,p_user_id uuid)
 returns boolean language sql stable security definer set search_path=''
-as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_conversations g where g.id=p_group_id and g.owner_id=p_user_id) $;
+as $fn$ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_conversations g where g.id=p_group_id and g.owner_id=p_user_id) $fn$;
 revoke all on function public.is_thunder_group_owner(uuid,uuid) from public,anon;
 grant execute on function public.is_thunder_group_owner(uuid,uuid) to authenticated;
 
@@ -148,7 +148,7 @@ for delete to authenticated using (user_id=(select auth.uid()));
 
 create or replace function public.touch_thunder_group_updated_at()
 returns trigger language plpgsql security definer set search_path=''
-as $
+as $body$
 begin
   update public.group_conversations set updated_at=now() where id=new.group_id;
   return new;
@@ -161,14 +161,14 @@ for each row execute function public.touch_thunder_group_updated_at();
 
 
 -- Prevent anonymous Supabase Auth sessions from using Messenger group features.
-do $
+do $do$
 declare t text;
 begin
   foreach t in array array['group_conversations','group_members','group_messages','group_message_reads','group_message_reactions'] loop
     execute format('drop policy if exists %I on public.%I',t||'_permanent_users_only',t);
     execute format('create policy %I on public.%I as restrictive for all to authenticated using (((select auth.jwt()->>''is_anonymous''))::boolean is false) with check (((select auth.jwt()->>''is_anonymous''))::boolean is false)',t||'_permanent_users_only',t);
   end loop;
-end $;
+end $do$;
 drop policy if exists thunder_chat_images_permanent_users_only on storage.objects;
 create policy thunder_chat_images_permanent_users_only on storage.objects as restrictive
 for all to authenticated using (

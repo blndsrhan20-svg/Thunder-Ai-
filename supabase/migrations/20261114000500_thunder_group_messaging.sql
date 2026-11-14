@@ -51,6 +51,17 @@ create table if not exists public.group_message_reactions (
   primary key(message_id,user_id,emoji)
 );
 
+create or replace function public.is_thunder_group_member(p_group_id uuid,p_user_id uuid)
+returns boolean language sql stable security definer set search_path=''
+as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id) $;
+create or replace function public.is_thunder_group_admin(p_group_id uuid,p_user_id uuid)
+returns boolean language sql stable security definer set search_path=''
+as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id and gm.role in ('owner','admin')) $;
+revoke all on function public.is_thunder_group_member(uuid,uuid) from public,anon;
+revoke all on function public.is_thunder_group_admin(uuid,uuid) from public,anon;
+grant execute on function public.is_thunder_group_member(uuid,uuid) to authenticated;
+grant execute on function public.is_thunder_group_admin(uuid,uuid) to authenticated;
+
 alter table public.group_conversations enable row level security;
 alter table public.group_members enable row level security;
 alter table public.group_messages enable row level security;
@@ -65,17 +76,14 @@ grant select,insert,delete on public.group_message_reactions to authenticated;
 
 drop policy if exists group_conversations_member_read on public.group_conversations;
 create policy group_conversations_member_read on public.group_conversations
-for select to authenticated using (exists (
-  select 1 from public.group_members gm
-  where gm.group_id=id and gm.user_id=(select auth.uid())
-));
+for select to authenticated using (public.is_thunder_group_member(id,(select auth.uid())));
 drop policy if exists group_conversations_owner_create on public.group_conversations;
 create policy group_conversations_owner_create on public.group_conversations
 for insert to authenticated with check (owner_id=(select auth.uid()));
 drop policy if exists group_conversations_admin_update on public.group_conversations;
 create policy group_conversations_admin_update on public.group_conversations
 for update to authenticated
-using (exists (select 1 from public.group_members gm where gm.group_id=id and gm.user_id=(select auth.uid()) and gm.role in ('owner','admin')))
+using (public.is_thunder_group_admin(id,(select auth.uid())))
 with check (exists (select 1 from public.group_members gm where gm.group_id=id and gm.user_id=(select auth.uid()) and gm.role in ('owner','admin')));
 drop policy if exists group_conversations_owner_delete on public.group_conversations;
 create policy group_conversations_owner_delete on public.group_conversations
@@ -83,24 +91,15 @@ for delete to authenticated using (owner_id=(select auth.uid()));
 
 drop policy if exists group_members_member_read on public.group_members;
 create policy group_members_member_read on public.group_members
-for select to authenticated using (exists (
-  select 1 from public.group_members mine
-  where mine.group_id=group_id and mine.user_id=(select auth.uid())
-));
+for select to authenticated using (public.is_thunder_group_member(group_members.group_id,(select auth.uid())));
 drop policy if exists group_members_admin_add on public.group_members;
 create policy group_members_admin_add on public.group_members
-for insert to authenticated with check (exists (
-  select 1 from public.group_conversations g
-  where g.id=group_id and g.owner_id=(select auth.uid())
-) or exists (
-  select 1 from public.group_members mine
-  where mine.group_id=group_id and mine.user_id=(select auth.uid()) and mine.role in ('owner','admin')
-));
+for insert to authenticated with check (exists (select 1 from public.group_conversations g where g.id=group_members.group_id and g.owner_id=(select auth.uid())) or public.is_thunder_group_admin(group_members.group_id,(select auth.uid())));
 drop policy if exists group_members_admin_or_self_remove on public.group_members;
 create policy group_members_admin_or_self_remove on public.group_members
 for delete to authenticated using (
   (user_id=(select auth.uid()) and role <> 'owner')
-  or exists (select 1 from public.group_members mine where mine.group_id=group_id and mine.user_id=(select auth.uid()) and mine.role in ('owner','admin'))
+  or public.is_thunder_group_admin(group_members.group_id,(select auth.uid()))
 );
 drop policy if exists group_members_self_update on public.group_members;
 create policy group_members_self_update on public.group_members
@@ -109,17 +108,11 @@ with check (user_id=(select auth.uid()));
 
 drop policy if exists group_messages_member_read on public.group_messages;
 create policy group_messages_member_read on public.group_messages
-for select to authenticated using (exists (
-  select 1 from public.group_members gm
-  where gm.group_id=group_id and gm.user_id=(select auth.uid())
-));
+for select to authenticated using (public.is_thunder_group_member(group_messages.group_id,(select auth.uid())));
 drop policy if exists group_messages_member_send on public.group_messages;
 create policy group_messages_member_send on public.group_messages
 for insert to authenticated with check (
-  sender_id=(select auth.uid()) and exists (
-    select 1 from public.group_members gm
-    where gm.group_id=group_id and gm.user_id=(select auth.uid())
-  )
+  sender_id=(select auth.uid()) and public.is_thunder_group_member(group_messages.group_id,(select auth.uid()))
 );
 drop policy if exists group_messages_sender_edit on public.group_messages;
 create policy group_messages_sender_edit on public.group_messages
@@ -131,32 +124,20 @@ for delete to authenticated using (sender_id=(select auth.uid()));
 
 drop policy if exists group_message_reads_member_read on public.group_message_reads;
 create policy group_message_reads_member_read on public.group_message_reads
-for select to authenticated using (exists (
-  select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
-  where m.id=message_id and gm.user_id=(select auth.uid())
-));
+for select to authenticated using (exists (select 1 from public.group_messages m where m.id=group_message_reads.message_id and public.is_thunder_group_member(m.group_id,(select auth.uid()))));
 drop policy if exists group_message_reads_self_insert on public.group_message_reads;
 create policy group_message_reads_self_insert on public.group_message_reads
 for insert to authenticated with check (
-  user_id=(select auth.uid()) and exists (
-    select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
-    where m.id=message_id and gm.user_id=(select auth.uid())
-  )
+  user_id=(select auth.uid()) and exists (select 1 from public.group_messages m where m.id=group_message_reads.message_id and public.is_thunder_group_member(m.group_id,(select auth.uid())))
 );
 
 drop policy if exists group_reactions_member_read on public.group_message_reactions;
 create policy group_reactions_member_read on public.group_message_reactions
-for select to authenticated using (exists (
-  select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
-  where m.id=message_id and gm.user_id=(select auth.uid())
-));
+for select to authenticated using (exists (select 1 from public.group_messages m where m.id=group_message_reactions.message_id and public.is_thunder_group_member(m.group_id,(select auth.uid()))));
 drop policy if exists group_reactions_self_insert on public.group_message_reactions;
 create policy group_reactions_self_insert on public.group_message_reactions
 for insert to authenticated with check (
-  user_id=(select auth.uid()) and exists (
-    select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
-    where m.id=message_id and gm.user_id=(select auth.uid())
-  )
+  user_id=(select auth.uid()) and exists (select 1 from public.group_messages m where m.id=group_message_reactions.message_id and public.is_thunder_group_member(m.group_id,(select auth.uid())))
 );
 drop policy if exists group_reactions_self_delete on public.group_message_reactions;
 create policy group_reactions_self_delete on public.group_message_reactions

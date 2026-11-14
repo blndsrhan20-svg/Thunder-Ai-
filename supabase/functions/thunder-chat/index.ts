@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
       const prompt = typeof input.prompt === "string" ? input.prompt.trim().slice(0, 3000) : "";
       if (!prompt) return new Response(JSON.stringify({ error: "اكتب وصفاً صالحاً أولاً." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (input.action === "generate_image") {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=" + encodeURIComponent(apiKey), {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=" + encodeURIComponent(apiKey), {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contents: [{ parts: [{ text: "Create one high-quality image based on this description. Return an image, not just text. Description: " + prompt }] }], generationConfig: { responseModalities: ["IMAGE", "TEXT"] } }), signal: req.signal,
         });
@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
       const length = typeof input.length === "string" && input.length.includes("30-second") ? "Create a short 30-second music clip." : "Create a complete song about 2 minutes long with verses, chorus and bridge.";
       const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
         method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({ model: "lyria-3-pro-preview", input: length + " Musical style: " + style + ". User's song idea and lyrics: " + prompt }), signal: req.signal,
+        body: JSON.stringify({ model: length.startsWith("Create a short") ? "lyria-3-clip-preview" : "lyria-3-pro-preview", input: length + " Musical style: " + style + ". User's song idea and lyrics: " + prompt }), signal: req.signal,
       });
       if (!response.ok) { const detail = (await response.text()).slice(0, 1200); return new Response(JSON.stringify({ error: "Lyria music generation failed", detail }), { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
       const music = await response.json(); let audioData = music.output_audio?.data || ""; let lyrics = music.output_text || "";

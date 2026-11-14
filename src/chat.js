@@ -101,7 +101,7 @@ export async function markDirectRead(conversationId,userId){
  const {data,error}=await supabase.from("direct_messages").select("id").eq("conversation_id",conversationId).neq("sender_id",userId).order("created_at",{ascending:false}).limit(80);
  if(error)throw error;if(!data?.length)return;
  const rows=data.map(m=>({message_id:m.id,user_id:userId}));
- const r=await supabase.from("direct_message_reads").insert(rows);
+ const r=await supabase.from("direct_message_reads").upsert(rows,{onConflict:"message_id,user_id",ignoreDuplicates:true});
  if(r.error&&r.error.code!=="23505")throw r.error;
 }
 export async function getDirectReadStatus(ids){if(!ids.length)return[];const r=await supabase.from("direct_message_reads").select("message_id,user_id").in("message_id",ids);if(r.error)throw r.error;return r.data||[]}

@@ -63,7 +63,7 @@ body{background:#080d16}
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const SUPABASE_URL='https://qdadoqjecoztygckuckm.supabase.co';
 const SUPABASE_KEY='sb_publishable_is9fla7kfuUa00zjPrDk5w_P2vEAFAS';
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});\nif('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('PWA worker:',err)));}
 const $=id=>document.getElementById(id);
 let user=null, profile=null, conversations=[], activeId=null, peer=null, channel=null, authMode='login', busy=false, searchTimer=null;
 const avatarColors=['','pink','green','violet'];

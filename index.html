@@ -169,6 +169,7 @@ dialog .row .g{background:var(--panel2);border-radius:10px;padding:10px 14px}
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const DEF_SYS = "أنت Thunder Ai، مساعد ذكاء اصطناعي عام يتحدث بطلاقة بالعربية وبأي لغة يكتب بها المستخدم. المطوّر الذي أنشأ Thunder AI هو بلند إدريس سرحان، المعروف بلقب ناندو. عند السؤال عن مطوّرك أو من أنشأك أجب بذلك. تحدث بأسلوب طبيعي وودود وسلس كأنك مساعد ذكي يفهم سياق الحديث، وليس كآلة تكرر قوالب رسمية. طابق لغة المستخدم ولهجته ومستوى رسميته؛ إذا كتب بالعراقي فأجبه بعراقي طبيعي، وإذا كتب بلغة أخرى فأجبه بلغته. إذا استخدم المستخدم الإيموجيات فاستخدمها أنت أيضاً بشكل مناسب وبنفس الروح والكمية التقريبية، ويمكنك استخدام إيموجي خفيف عندما يناسب السياق حتى لو لم يستخدمها، لكن لا تكثر منها ولا تضعها في كل جملة. افهم المزاح والمشاعر ورد بتفاعل إنساني متزن، وكن مختصراً في الحديث البسيط ومفصلاً عند الحاجة. لا تبدأ كل إجابة بمقدمة نمطية ولا تحول كل رد إلى قائمة؛ استخدم التنسيق فقط عندما يفيد. أجب بدقة وصدق ووضوح، واكتب الأكواد داخل كتل برمجية مع تحديد اللغة، ونسّق الإجابات الطويلة بعناوين وقوائم. إذا لم تعرف شيئاً فقل ذلك بدل التخمين.";
+const CHAT_STYLE_PROMPT = "أسلوب المحادثة إلزامي: تحدث بطبيعية وودّ ودفء، وتجنب النبرة الآلية والمقدمات المحفوظة. طابق لغة المستخدم ولهجته ودرجة عفويته. إذا احتوت رسالة المستخدم الأخيرة على إيموجي أو رموز تعبيرية، فاستخدم في ردك إيموجياً أو اثنين مناسبين على الأقل وبشكل طبيعي، ولا تتجاهل أسلوبه التعبيري. إذا كان السياق مرحاً أو ودياً، يمكنك استخدام إيموجيات حتى إن لم يستخدمها المستخدم. لا تفرط في الإيموجيات ولا تستخدمها في المواضيع الحساسة أو الجادة إذا كانت ستبدو غير مناسبة. لا تقل إنك لا تستخدم الإيموجي. اجعل الردود اليومية حوارية ومباشرة، ولا تستخدم القوائم إلا عند الحاجة.";
 const $ = id => document.getElementById(id);
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch(e){ return d } },
@@ -418,7 +419,7 @@ async function run(){
   const recentHistory = c.msgs.slice(0, -1).slice(-12).map(m => ({...m,c:(m.c || '').slice(-12000)}));
   const body = {
     stream: true, temperature: Number(cfg.temp),
-    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:m.image?[{type:'text',text:m.c||'حلّل المرفق.'},{type:'image_url',image_url:{url:m.image}}]:m.c})))
+    messages: [{role:'system', content: (cfg.sys || DEF_SYS) + '\n\n' + CHAT_STYLE_PROMPT + (MODE_PROMPTS[$('mode').value] || '') + (LANG_PROMPTS[cfg.language] ? '\n\n'+LANG_PROMPTS[cfg.language] : '') + (userMemory ? '\n\nذاكرة المستخدم التي يجوز استخدامها عند الصلة فقط:\n' + userMemory : '')}].concat(recentHistory.map(m => ({role:m.r,content:m.image?[{type:'text',text:m.c||'حلّل المرفق.'},{type:'image_url',image_url:{url:m.image}}]:m.c})))
   };
   try{
     const {data: fresh} = await supabase.auth.getSession();

@@ -1,6 +1,6 @@
 import {supabase} from "./supabase.js";
 import {signIn,signUp,signOut,getSession,loadProfile,saveProfile} from "./auth.js";
-import {listConversations,getMessages,sendMessage,findPeople,openDirectConversation,watchMessages,sendImage,signedImageUrl,listGroups,createGroup,getGroupMessages,sendGroupMessage,sendGroupImage,markGroupRead,toggleGroupReaction,getGroupReactions} from "./chat.js";
+import {listConversations,getMessages,sendMessage,findPeople,openDirectConversation,watchMessages,sendImage,signedImageUrl,listGroups,createGroup,getGroupMessages,sendGroupMessage,sendGroupImage,markGroupRead,toggleGroupReaction,getGroupReactions,sendVoiceMessage} from "./chat.js";
 const $=id=>document.getElementById(id);
 const state={user:null,profile:null,conversations:[],groups:[],active:null,activeType:"direct",peer:null,channel:null,mode:"login",filter:"all",busy:false};
 const initial=s=>(s||"?").trim().slice(0,1).toUpperCase();
@@ -28,7 +28,7 @@ async function showMessages(id,kind=state.activeType){
  for(const m of rows){const b=document.createElement("article");b.className="message"+(m.sender_id===state.user.id?" mine":"");
  if(kind==="group"&&m.sender_id!==state.user.id){const who=document.createElement("small");who.className="message-sender";who.textContent=m.sender?.display_name||m.sender?.username||"عضو";b.append(who)}
  if(m.content)b.append(document.createTextNode(m.content));
- if(m.image_path){try{const img=document.createElement("img");img.className="message-image";img.alt="صورة مرسلة";img.src=await signedImageUrl(m.image_path);b.append(img)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل الصورة";b.append(unavailable)}}
+ if(m.image_path){try{const img=document.createElement("img");img.className="message-image";img.alt="صورة مرسلة";img.src=await signedImageUrl(m.image_path);b.append(img)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل الصورة";b.append(unavailable)}}if(m.audio_path){try{const audio=document.createElement("audio");audio.className="message-audio";audio.controls=true;audio.preload="none";audio.src=await signedImageUrl(m.audio_path);b.append(audio)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل التسجيل";b.append(unavailable)}}
  const t=document.createElement("time");t.textContent=fmt(m.created_at);b.append(t);
  if(kind==="group"){const bar=document.createElement("div");bar.className="reaction-bar";for(const emoji of ["👍","❤️","😂","😮","🙏"]){const users=reactions.filter(x=>x.message_id===m.id&&x.emoji===emoji);const btn=document.createElement("button");btn.type="button";btn.className="reaction"+(users.some(x=>x.user_id===state.user.id)?" selected":"");btn.textContent=emoji+(users.length?(" "+users.length):"");btn.onclick=async()=>{try{await toggleGroupReaction(m.id,state.user.id,emoji);await showMessages(id,kind)}catch(err){toast("تعذر إضافة التفاعل: "+err.message)}};bar.append(btn)}b.append(bar)}
  host.append(b)}
@@ -52,6 +52,30 @@ $("sign-out").onclick=async()=>{if(state.channel)await supabase.removeChannel(st
 $("settings-open").onclick=()=>openDialog('<h2>الإعدادات</h2><p class="muted">Thunder Messenger — إصدار إعادة البناء.</p><p>'+escape(state.user.email)+'</p><p>لم يتم تفعيل ميزات الاتصال أو رفع الملفات في هذه النسخة بعد.</p>');
 $("chat-search-toggle").onclick=()=>{$("chat-search-row").classList.toggle("hidden");$("search-in-chat").focus()};$("close-chat-search").onclick=()=>$("chat-search-row").classList.add("hidden");
 $("search-in-chat").oninput=()=>{const q=$("search-in-chat").value.toLowerCase();for(const el of $("message-list").children)el.classList.toggle("hidden",q&&!el.textContent.toLowerCase().includes(q))};
+let recorder=null,recordingStream=null,recordingChunks=[];
+$("voice-record").onclick=async()=>{
+ if(recorder&&recorder.state==="recording"){recorder.stop();$("voice-record").textContent="🎙";$("voice-record").disabled=true;return}
+ if(!state.active){toast("افتح محادثة أولاً");return}
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast("التسجيل الصوتي غير مدعوم في هذا المتصفح");return}
+ const targetId=state.active,targetKind=state.activeType;
+ try{
+  recordingStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  const candidates=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
+  const mime=candidates.find(x=>MediaRecorder.isTypeSupported?.(x));
+  recorder=new MediaRecorder(recordingStream,mime?{mimeType:mime}:undefined);recordingChunks=[];
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)recordingChunks.push(e.data)};
+  recorder.onerror=()=>toast("حدث خطأ أثناء التسجيل الصوتي");
+  recorder.onstop=async()=>{
+   try{
+    const rawType=(recorder.mimeType||recordingChunks[0]?.type||"audio/mp4").split(";")[0];
+    const blob=new Blob(recordingChunks,{type:rawType});
+    if(blob.size){const ext=({"audio/mp4":"m4a","audio/webm":"webm","audio/ogg":"ogg"})[rawType]||"m4a";const file=new File([blob],"voice-message."+ext,{type:rawType});await sendVoiceMessage(targetKind,targetId,state.user.id,file);if(state.active===targetId&&state.activeType===targetKind)await showMessages(targetId,targetKind);await refresh();toast("تم إرسال الرسالة الصوتية")}
+   }catch(err){toast("تعذر إرسال التسجيل: "+err.message)}
+   finally{recordingStream?.getTracks().forEach(t=>t.stop());recordingStream=null;recordingChunks=[];$("voice-record").disabled=false;$("voice-record").textContent="🎙"}
+  };
+  recorder.start();$("voice-record").textContent="■";toast("التسجيل يعمل — اضغط الزر لإيقافه وإرساله")
+ }catch(err){recordingStream?.getTracks().forEach(t=>t.stop());recordingStream=null;toast("تعذر استخدام الميكروفون: "+err.message)}
+};
 $("attach").onclick=()=>$("file-input").click();$("file-input").onchange=async()=>{const file=$("file-input").files?.[0];if(!file||!state.active)return;try{if(state.activeType==="group")await sendGroupImage(state.active,state.user.id,file);else await sendImage(state.active,state.user.id,file);$("file-input").value="";await showMessages(state.active,state.activeType);await refresh();toast("تم إرسال الصورة")}catch(err){toast("تعذر إرسال الصورة: "+err.message)}};
 $("chat-menu").onclick=()=>toast("قائمة أدوات المحادثة المتقدمة ستضاف بعد إكمال وظائفها فعلياً.");
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.filter=b.dataset.filter;toast(state.filter==="all"?"عرض كل المحادثات":state.filter==="groups"?"عرض المجموعات":"فلتر غير المقروءة قيد التطوير")});

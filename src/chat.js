@@ -23,7 +23,11 @@ export async function signedImageUrl(path){
 
 export async function listGroups(userId){
  const memberships=await supabase.from("group_members").select("group_id,role").eq("user_id",userId);
- if(memberships.error)throw memberships.error;
+ if(memberships.error){
+  // Keep direct messages and member search usable before the additive group migration is applied.
+  if(memberships.error.code==="PGRST205"||memberships.error.code==="42P01"||/group_members.*schema cache|Could not find the table/i.test(memberships.error.message||""))return[];
+  throw memberships.error;
+ }
  const ids=(memberships.data||[]).map(x=>x.group_id);if(!ids.length)return[];
  const groups=await supabase.from("group_conversations").select("id,title,description,owner_id,created_at,updated_at").in("id",ids).order("updated_at",{ascending:false});
  if(groups.error)throw groups.error;

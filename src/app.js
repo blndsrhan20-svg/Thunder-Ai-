@@ -60,7 +60,7 @@ $("mobile-search").onclick=newChat;
 $("mobile-create").onclick=()=>$("post-caption").focus();
 $("mobile-messages").onclick=()=>showView("messages");
 $("mobile-profile").onclick=()=>$("profile-open").click();
-\n$("search-chats").oninput=renderList;
+$("search-chats").oninput=renderList;
 $("composer").onsubmit=async e=>{e.preventDefault();const value=$("message-input").value.trim();if(!value||!state.active||state.busy)return;state.busy=true;$("send").disabled=true;try{const r=state.activeType==="group"?await sendGroupMessage(state.active,state.user.id,value):await sendMessage(state.active,state.user.id,value);if(r.error)throw r.error;$("message-input").value="";await showMessages(state.active,state.activeType);await refresh()}catch(err){toast("تعذر إرسال الرسالة: "+err.message)}finally{state.busy=false;$("send").disabled=false;$("message-input").focus()}};
 function openDialog(html){$("dialog-content").innerHTML=html;$("dialog").classList.remove("hidden")}
 async function newGroupDialog(){

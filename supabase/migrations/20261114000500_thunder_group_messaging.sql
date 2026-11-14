@@ -69,7 +69,7 @@ alter table public.group_message_reads enable row level security;
 alter table public.group_message_reactions enable row level security;
 
 grant select,insert,update,delete on public.group_conversations to authenticated;
-grant select,insert,update,delete on public.group_members to authenticated;
+grant select,insert,delete on public.group_members to authenticated;
 grant select,insert,update,delete on public.group_messages to authenticated;
 grant select,insert on public.group_message_reads to authenticated;
 grant select,insert,delete on public.group_message_reactions to authenticated;
@@ -84,7 +84,7 @@ drop policy if exists group_conversations_admin_update on public.group_conversat
 create policy group_conversations_admin_update on public.group_conversations
 for update to authenticated
 using (public.is_thunder_group_admin(id,(select auth.uid())))
-with check (exists (select 1 from public.group_members gm where gm.group_id=id and gm.user_id=(select auth.uid()) and gm.role in ('owner','admin')));
+with check (public.is_thunder_group_admin(id,(select auth.uid())));
 drop policy if exists group_conversations_owner_delete on public.group_conversations;
 create policy group_conversations_owner_delete on public.group_conversations
 for delete to authenticated using (owner_id=(select auth.uid()));
@@ -101,10 +101,6 @@ for delete to authenticated using (
   (user_id=(select auth.uid()) and role <> 'owner')
   or public.is_thunder_group_admin(group_members.group_id,(select auth.uid()))
 );
-drop policy if exists group_members_self_update on public.group_members;
-create policy group_members_self_update on public.group_members
-for update to authenticated using (user_id=(select auth.uid()))
-with check (user_id=(select auth.uid()));
 
 drop policy if exists group_messages_member_read on public.group_messages;
 create policy group_messages_member_read on public.group_messages
@@ -116,11 +112,11 @@ for insert to authenticated with check (
 );
 drop policy if exists group_messages_sender_edit on public.group_messages;
 create policy group_messages_sender_edit on public.group_messages
-for update to authenticated using (sender_id=(select auth.uid()))
-with check (sender_id=(select auth.uid()));
+for update to authenticated using (sender_id=(select auth.uid()) and public.is_thunder_group_member(group_messages.group_id,(select auth.uid())))
+with check (sender_id=(select auth.uid()) and public.is_thunder_group_member(group_messages.group_id,(select auth.uid())));
 drop policy if exists group_messages_sender_delete on public.group_messages;
 create policy group_messages_sender_delete on public.group_messages
-for delete to authenticated using (sender_id=(select auth.uid()));
+for delete to authenticated using (sender_id=(select auth.uid()) and public.is_thunder_group_member(group_messages.group_id,(select auth.uid())));
 
 drop policy if exists group_message_reads_member_read on public.group_message_reads;
 create policy group_message_reads_member_read on public.group_message_reads

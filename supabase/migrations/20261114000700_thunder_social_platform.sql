@@ -180,6 +180,15 @@ begin
     if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notifications') then
       alter publication supabase_realtime add table public.notifications;
     end if;
+    if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='post_likes') then
+      alter publication supabase_realtime add table public.post_likes;
+    end if;
+    if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='post_comments') then
+      alter publication supabase_realtime add table public.post_comments;
+    end if;
+    if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='stories') then
+      alter publication supabase_realtime add table public.stories;
+    end if;
   end if;
 end $$;
 

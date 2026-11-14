@@ -58,6 +58,32 @@ Deno.serve(async (req: Request) => {
       });
     }
     const input = JSON.parse(raw);
+    if (input.action === "generate_image" || input.action === "generate_music") {
+      const prompt = typeof input.prompt === "string" ? input.prompt.trim().slice(0, 3000) : "";
+      if (!prompt) return new Response(JSON.stringify({ error: "اكتب وصفاً صالحاً أولاً." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (input.action === "generate_image") {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=" + encodeURIComponent(apiKey), {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: "Create one high-quality image based on this description. Return an image, not just text. Description: " + prompt }] }], generationConfig: { responseModalities: ["IMAGE", "TEXT"] } }), signal: req.signal,
+        });
+        if (!response.ok) { const detail = (await response.text()).slice(0, 1200); return new Response(JSON.stringify({ error: "Gemini image generation failed", detail }), { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
+        const result = await response.json(); const parts = result.candidates?.[0]?.content?.parts || []; const part = parts.find((p: any) => p.inlineData?.data);
+        if (!part) return new Response(JSON.stringify({ error: "لم يرجع نموذج الصور صورة. جرّب وصفاً آخر." }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ imageBase64: part.inlineData.data, mimeType: part.inlineData.mimeType || "image/png" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const style = typeof input.style === "string" ? input.style.slice(0, 240) : "modern pop";
+      const length = typeof input.length === "string" && input.length.includes("30-second") ? "Create a short 30-second music clip." : "Create a complete song about 2 minutes long with verses, chorus and bridge.";
+      const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+        method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({ model: "lyria-3-pro-preview", input: length + " Musical style: " + style + ". User's song idea and lyrics: " + prompt }), signal: req.signal,
+      });
+      if (!response.ok) { const detail = (await response.text()).slice(0, 1200); return new Response(JSON.stringify({ error: "Lyria music generation failed", detail }), { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
+      const music = await response.json(); let audioData = music.output_audio?.data || ""; let lyrics = music.output_text || "";
+      for (const step of music.steps || []) { if (step.type !== "model_output") continue; for (const block of step.content || []) { if (block.type === "audio" && block.data) audioData = block.data; if (block.type === "text" && block.text) lyrics += (lyrics ? "\n" : "") + block.text; } }
+      if (!audioData) return new Response(JSON.stringify({ error: "لم يرجع نموذج الموسيقى ملفاً صوتياً. حاول مرة أخرى." }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ audioBase64: audioData, mimeType: "audio/mpeg", lyrics }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (!Array.isArray(input.messages) || input.messages.length < 1 || input.messages.length > 60) {
       return new Response(JSON.stringify({ error: "Invalid messages" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },

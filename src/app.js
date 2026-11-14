@@ -1,0 +1,83 @@
+import {supabase} from "./supabase.js";
+import {signIn,signUp,signOut,getSession,loadProfile,saveProfile} from "./auth.js";
+import {listConversations,getMessages,sendMessage,findPeople,openDirectConversation,watchMessages,sendImage,signedImageUrl,listGroups,createGroup,getGroupMessages,sendGroupMessage,sendGroupImage,markGroupRead,toggleGroupReaction,getGroupReactions,sendVoiceMessage} from "./chat.js";
+const $=id=>document.getElementById(id);
+const state={user:null,profile:null,conversations:[],groups:[],active:null,activeType:"direct",peer:null,channel:null,mode:"login",filter:"all",busy:false};
+const initial=s=>(s||"?").trim().slice(0,1).toUpperCase();
+const fmt=s=>s?new Intl.DateTimeFormat("ar-IQ",{hour:"2-digit",minute:"2-digit"}).format(new Date(s)):"";
+const escape=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(s){$("toast").textContent=s;setTimeout(()=>$("toast").textContent="",2800)}
+function setMode(mode){state.mode=mode;$("auth-title").textContent=mode==="login"?"مرحباً بك في Thunder":"أنشئ حساب Thunder";$("auth-submit").textContent=mode==="login"?"تسجيل الدخول":"إنشاء حساب";$("auth-toggle").textContent=mode==="login"?"إنشاء حساب":"لدي حساب بالفعل"}
+$("auth-toggle").onclick=()=>setMode(state.mode==="login"?"signup":"login");
+$("auth-form").onsubmit=async e=>{e.preventDefault();$("auth-message").textContent="جارٍ الاتصال...";$("auth-submit").disabled=true;try{const r=state.mode==="login"?await signIn($("email").value,$("password").value):await signUp($("email").value,$("password").value);if(r.error)throw r.error;if(state.mode==="signup"&&!r.data.session){$("auth-message").textContent="تحقق من بريدك الإلكتروني ثم سجّل الدخول.";return}await boot(r.data.user)}catch(err){$("auth-message").textContent=err.message||"تعذر تسجيل الدخول"}finally{$("auth-submit").disabled=false}};
+async function boot(user){state.user=user;const p=await loadProfile(user.id);if(p.error)throw p.error;state.profile=p.data;if(!state.profile){const name=(user.email||"Thunder").split("@")[0];const created=await saveProfile(user.id,name,"u_"+user.id.slice(0,12),false);if(created.error){$("auth-message").textContent="تعذر إنشاء الملف الشخصي: "+created.error.message;return}state.profile=created.data}$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("profile-open").textContent=initial(state.profile.display_name);await refresh();if(state.channel)await supabase.removeChannel(state.channel);state.channel=watchMessages(user.id,async m=>{await refresh();if((m._kind==="group"?m.group_id:m.conversation_id)===state.active&&(m._kind==="group"?"group":"direct")===state.activeType)await showMessages(state.active,state.activeType)},s=>{if(s==="CHANNEL_ERROR")toast("الاتصال الفوري غير متاح مؤقتاً")})}
+async function refresh(){const [conversations,groups]=await Promise.all([listConversations(state.user.id),listGroups(state.user.id)]);state.conversations=conversations;state.groups=groups;renderList()}
+function renderList(){
+ const host=$("conversation-list");host.replaceChildren();const q=$("search-chats").value.toLowerCase();
+ let rows=[...state.conversations.map(c=>({...c,_kind:"direct",label:c.other.display_name||c.other.username||"عضو Thunder"})),...state.groups.map(g=>({...g,_kind:"group",label:g.title}))];
+ if(state.filter==="groups")rows=rows.filter(x=>x._kind==="group");
+ rows=rows.filter(x=>x.label.toLowerCase().includes(q));
+ rows.sort((a,b)=>new Date(b.last?.created_at||b.updated_at||b.last_message_at||b.created_at)-new Date(a.last?.created_at||a.updated_at||a.last_message_at||a.created_at));
+ if(!rows.length){const d=document.createElement("div");d.className="empty-state";d.textContent="لا توجد محادثات بعد. ابدأ محادثة جديدة.";host.append(d);return}
+ for(const c of rows){const b=document.createElement("button");b.className="conversation-item"+(c.id===state.active&&c._kind===state.activeType?" active":"");const av=document.createElement("div");av.className="avatar";av.textContent=c._kind==="group"?"👥":initial(c.label);const cp=document.createElement("div");cp.className="conversation-copy";const top=document.createElement("div");top.className="conversation-top";const name=document.createElement("strong");name.textContent=c.label;const time=document.createElement("time");time.textContent=fmt(c.last?.created_at||c.updated_at||c.last_message_at);top.append(name,time);const bottom=document.createElement("div");bottom.className="conversation-bottom";const preview=document.createElement("p");preview.textContent=c.last?((c.last.sender_id===state.user.id?"أنت: ":"")+(c.last.content|| (c.last.audio_path?"🎙 رسالة صوتية":c.last.image_path?"📷 صورة":"رسالة"))):c._kind==="group"?(c.member_count+" أعضاء"):"ابدأ المحادثة";bottom.append(preview);cp.append(top,bottom);b.append(av,cp);b.onclick=()=>openChat(c,c._kind);host.append(b)}
+}
+async function openChat(c,kind="direct"){state.active=c.id;state.activeType=kind;state.peer=kind==="direct"?c.other:null;$("empty-workspace").classList.add("hidden");$("chat-view").classList.remove("hidden");$("app").classList.add("chat-open");$("chat-name").textContent=kind==="group"?c.title:(c.other.display_name||c.other.username);$("chat-status").textContent=kind==="group"?(c.member_count+" أعضاء · مجموعة Thunder"):(c.other.username?"@"+c.other.username:"Thunder Messenger");$("chat-avatar").textContent=kind==="group"?"👥":initial(c.other.display_name||c.other.username);$("message-input").disabled=false;$("send").disabled=false;renderList();await showMessages(c.id,kind)}
+async function showMessages(id,kind=state.activeType){
+ const rows=kind==="group"?await getGroupMessages(id):await getMessages(id);const host=$("message-list");host.replaceChildren();
+ const reactions=kind==="group"?await getGroupReactions(rows.map(m=>m.id)):[];
+ for(const m of rows){const b=document.createElement("article");b.className="message"+(m.sender_id===state.user.id?" mine":"");
+ if(kind==="group"&&m.sender_id!==state.user.id){const who=document.createElement("small");who.className="message-sender";who.textContent=m.sender?.display_name||m.sender?.username||"عضو";b.append(who)}
+ if(m.content)b.append(document.createTextNode(m.content));
+ if(m.image_path){try{const img=document.createElement("img");img.className="message-image";img.alt="صورة مرسلة";img.src=await signedImageUrl(m.image_path);b.append(img)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل الصورة";b.append(unavailable)}}if(m.audio_path){try{const audio=document.createElement("audio");audio.className="message-audio";audio.controls=true;audio.preload="none";audio.src=await signedImageUrl(m.audio_path);b.append(audio)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل التسجيل";b.append(unavailable)}}
+ const t=document.createElement("time");t.textContent=fmt(m.created_at);b.append(t);
+ if(kind==="group"){const bar=document.createElement("div");bar.className="reaction-bar";for(const emoji of ["👍","❤️","😂","😮","🙏"]){const users=reactions.filter(x=>x.message_id===m.id&&x.emoji===emoji);const btn=document.createElement("button");btn.type="button";btn.className="reaction"+(users.some(x=>x.user_id===state.user.id)?" selected":"");btn.textContent=emoji+(users.length?(" "+users.length):"");btn.onclick=async()=>{try{await toggleGroupReaction(m.id,state.user.id,emoji);await showMessages(id,kind)}catch(err){toast("تعذر إضافة التفاعل: "+err.message)}};bar.append(btn)}b.append(bar)}
+ host.append(b)}
+ if(kind==="group")try{await markGroupRead(id,state.user.id)}catch(err){}
+ host.scrollTop=host.scrollHeight
+}
+$("search-chats").oninput=renderList;
+$("composer").onsubmit=async e=>{e.preventDefault();const value=$("message-input").value.trim();if(!value||!state.active||state.busy)return;state.busy=true;$("send").disabled=true;try{const r=state.activeType==="group"?await sendGroupMessage(state.active,state.user.id,value):await sendMessage(state.active,state.user.id,value);if(r.error)throw r.error;$("message-input").value="";await showMessages(state.active,state.activeType);await refresh()}catch(err){toast("تعذر إرسال الرسالة: "+err.message)}finally{state.busy=false;$("send").disabled=false;$("message-input").focus()}};
+function openDialog(html){$("dialog-content").innerHTML=html;$("dialog").classList.remove("hidden")}
+async function newGroupDialog(){
+ openDialog('<h2>إنشاء مجموعة</h2><p class="muted">اختر اسماً وأضف أعضاء المجموعة.</p><input id="group-title" maxlength="80" placeholder="اسم المجموعة"><input id="group-description" maxlength="300" placeholder="وصف المجموعة (اختياري)"><input id="group-member-search" placeholder="ابحث عن الأعضاء..."><div id="group-selected" class="selected-members"></div><div id="group-search-results"></div><button id="group-create" class="button primary" style="width:100%;margin-top:14px">إنشاء المجموعة</button>');
+ const chosen=new Map(),search=$("group-member-search"),results=$("group-search-results"),selected=$("group-selected");
+ const draw=()=>{selected.replaceChildren();for(const p of chosen.values()){const chip=document.createElement("button");chip.type="button";chip.className="selected-chip";chip.textContent=(p.display_name||p.username)+" ×";chip.onclick=()=>{chosen.delete(p.id);draw()};selected.append(chip)}};
+ let timer;search.oninput=()=>{clearTimeout(timer);timer=setTimeout(async()=>{results.replaceChildren();if(search.value.trim().length<2)return;try{for(const p of await findPeople(search.value,state.user.id)){const b=document.createElement("button");b.className="person-result";const label=document.createElement("span");label.textContent=(p.display_name||p.username)+" · @"+p.username;b.append(label);b.onclick=()=>{chosen.set(p.id,p);draw();search.value="";results.replaceChildren()};results.append(b)}}catch(err){toast(err.message)}},250)};
+ $("group-create").onclick=async()=>{const title=$("group-title").value.trim(),description=$("group-description").value.trim();if(title.length<2){toast("اكتب اسماً للمجموعة");return}if(!chosen.size){toast("أضف عضواً واحداً على الأقل");return}const button=$("group-create");button.disabled=true;try{const g=await createGroup(state.user.id,title,description,[...chosen.keys()]);await refresh();$("dialog").classList.add("hidden");await openChat(g,"group");toast("تم إنشاء المجموعة")}catch(err){toast("تعذر إنشاء المجموعة: "+err.message)}finally{button.disabled=false}}
+}
+async function newChat(){openDialog('<h2>محادثة جديدة</h2><p class="muted">ابحث باسم المستخدم أو الاسم الظاهر أو رقم Thunder.</p><input id="people-query" placeholder="اسم المستخدم..." autocomplete="off"><div id="people-results"></div><button id="create-group-open" class="button ghost" style="margin-top:14px;width:100%">إنشاء مجموعة جديدة</button>');$("create-group-open").onclick=newGroupDialog;const input=$("people-query");let timer;input.oninput=()=>{clearTimeout(timer);timer=setTimeout(async()=>{const host=$("people-results");host.replaceChildren();if(input.value.trim().length<2)return;try{const people=await findPeople(input.value,state.user.id);for(const p of people){const b=document.createElement("button");b.className="person-result";const av=document.createElement("span");av.className="avatar";av.textContent=initial(p.display_name||p.username);const label=document.createElement("span");label.textContent=(p.display_name||p.username)+" · @"+p.username;b.append(av,label);b.onclick=async()=>{try{const id=await openDirectConversation(state.user.id,p.id);await refresh();const c=state.conversations.find(x=>x.id===id);if(c)await openChat(c);$("dialog").classList.add("hidden")}catch(err){toast(err.message)}};host.append(b)}}catch(err){toast(err.message)}},250)}}
+$("new-chat").onclick=newChat;$("start-chat").onclick=newChat;$("dialog-close").onclick=()=>$("dialog").classList.add("hidden");$("back").onclick=()=>$("app").classList.remove("chat-open");
+$("profile-open").onclick=()=>{openDialog('<h2>الملف الشخصي</h2><p class="muted">تعديل الاسم الظاهر واسم المستخدم.</p><input id="profile-name" maxlength="40" value="'+escape(state.profile.display_name)+'" placeholder="الاسم الظاهر"><input id="profile-user" maxlength="24" value="'+escape(state.profile.username)+'" placeholder="username" dir="ltr"><button id="profile-save" class="button primary">حفظ</button>');$("profile-save").onclick=async()=>{const name=$("profile-name").value.trim(),username=$("profile-user").value.trim().toLowerCase();if(!name||!/^[a-z0-9_]{3,24}$/.test(username)){toast("تحقق من الاسم واسم المستخدم");return}const r=await saveProfile(state.user.id,name,username,true);if(r.error){toast(r.error.message);return}state.profile=r.data;$("profile-open").textContent=initial(name);$("dialog").classList.add("hidden");toast("تم تحديث الملف الشخصي")}};
+$("sign-out").onclick=async()=>{if(state.channel)await supabase.removeChannel(state.channel);await signOut();location.reload()};
+$("settings-open").onclick=()=>openDialog('<h2>الإعدادات</h2><p class="muted">Thunder Messenger — إصدار إعادة البناء.</p><p>'+escape(state.user.email)+'</p><p>لم يتم تفعيل ميزات الاتصال أو رفع الملفات في هذه النسخة بعد.</p>');
+$("chat-search-toggle").onclick=()=>{$("chat-search-row").classList.toggle("hidden");$("search-in-chat").focus()};$("close-chat-search").onclick=()=>$("chat-search-row").classList.add("hidden");
+$("search-in-chat").oninput=()=>{const q=$("search-in-chat").value.toLowerCase();for(const el of $("message-list").children)el.classList.toggle("hidden",q&&!el.textContent.toLowerCase().includes(q))};
+let recorder=null,recordingStream=null,recordingChunks=[];
+$("voice-record").onclick=async()=>{
+ if(recorder&&recorder.state==="recording"){recorder.stop();$("voice-record").textContent="🎙";$("voice-record").disabled=true;return}
+ if(!state.active){toast("افتح محادثة أولاً");return}
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast("التسجيل الصوتي غير مدعوم في هذا المتصفح");return}
+ const targetId=state.active,targetKind=state.activeType;
+ try{
+  recordingStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  const candidates=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
+  const mime=candidates.find(x=>MediaRecorder.isTypeSupported?.(x));
+  recorder=new MediaRecorder(recordingStream,mime?{mimeType:mime}:undefined);recordingChunks=[];
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)recordingChunks.push(e.data)};
+  recorder.onerror=()=>toast("حدث خطأ أثناء التسجيل الصوتي");
+  recorder.onstop=async()=>{
+   try{
+    const rawType=(recorder.mimeType||recordingChunks[0]?.type||"audio/mp4").split(";")[0];
+    const blob=new Blob(recordingChunks,{type:rawType});
+    if(blob.size){const ext=({"audio/mp4":"m4a","audio/webm":"webm","audio/ogg":"ogg"})[rawType]||"m4a";const file=new File([blob],"voice-message."+ext,{type:rawType});await sendVoiceMessage(targetKind,targetId,state.user.id,file);if(state.active===targetId&&state.activeType===targetKind)await showMessages(targetId,targetKind);await refresh();toast("تم إرسال الرسالة الصوتية")}
+   }catch(err){toast("تعذر إرسال التسجيل: "+err.message)}
+   finally{recordingStream?.getTracks().forEach(t=>t.stop());recordingStream=null;recordingChunks=[];$("voice-record").disabled=false;$("voice-record").textContent="🎙"}
+  };
+  recorder.start();$("voice-record").textContent="■";toast("التسجيل يعمل — اضغط الزر لإيقافه وإرساله")
+ }catch(err){recordingStream?.getTracks().forEach(t=>t.stop());recordingStream=null;toast("تعذر استخدام الميكروفون: "+err.message)}
+};
+$("attach").onclick=()=>$("file-input").click();$("file-input").onchange=async()=>{const file=$("file-input").files?.[0];if(!file||!state.active)return;try{if(state.activeType==="group")await sendGroupImage(state.active,state.user.id,file);else await sendImage(state.active,state.user.id,file);$("file-input").value="";await showMessages(state.active,state.activeType);await refresh();toast("تم إرسال الصورة")}catch(err){toast("تعذر إرسال الصورة: "+err.message)}};
+$("chat-menu").onclick=()=>toast("قائمة أدوات المحادثة المتقدمة ستضاف بعد إكمال وظائفها فعلياً.");
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.filter=b.dataset.filter;toast(state.filter==="all"?"عرض كل المحادثات":state.filter==="groups"?"عرض المجموعات":"فلتر غير المقروءة قيد التطوير")});
+(async()=>{try{const s=await getSession();if(s.error)throw s.error;if(s.data.session)await boot(s.data.session.user)}catch(err){toast(err.message)}})();
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));

@@ -500,10 +500,15 @@ $('authForm').addEventListener('submit', async e => {
     if(authMode === 'signup'){
       const {data,error} = await supabase.auth.signUp({email,password});
       if(error) throw error;
-      if(data.session) await supabase.auth.signOut();
-      $('authMsg').textContent = data.session
-        ? 'تم إنشاء الحساب بنجاح. سجّل الدخول الآن باستخدام بريدك وكلمة المرور.'
-        : 'تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم سجّل الدخول.';
+      if(!data.user) throw new Error('لم يرجع Supabase بيانات الحساب. حاول مرة أخرى.');
+      // Confirm Email is disabled for this project: signUp should create a session.
+      // Sign it out immediately so account creation never logs the visitor in automatically.
+      if(data.session){
+        await supabase.auth.signOut();
+        $('authMsg').textContent = 'تم إنشاء الحساب بنجاح. لم يتم تسجيل دخولك تلقائياً؛ سجّل الدخول الآن بالبريد وكلمة المرور.';
+      }else{
+        $('authMsg').textContent = 'وصل طلب إنشاء الحساب، لكن Supabase لم يُنشئ جلسة. تأكد أن Confirm Email معطّل في مشروع Thunder-AI الصحيح ثم أعد المحاولة؛ لم يتم تسجيل دخولك.';
+      }
     }else{
       const {data,error} = await supabase.auth.signInWithPassword({email,password});
       if(error) throw error; await enterAccount(data.session);
@@ -512,9 +517,9 @@ $('authForm').addEventListener('submit', async e => {
     const code = String(err.code || err.error_code || '');
     const detail = String(err.message || '');
     if(code === 'over_email_send_rate_limit' || /email rate limit exceeded/i.test(detail)){
-      $('authMsg').textContent = 'وصل حد إرسال رسائل التأكيد في Supabase. خدمة البريد الافتراضية تسمح برسالتين فقط في الساعة للمشروع. جرّب لاحقاً؛ وللسماح للجميع بإنشاء حسابات، يجب ربط خدمة SMTP مخصصة في Supabase.';
+      $('authMsg').textContent = 'Supabase ما زال يحاول إرسال رسالة تأكيد. تأكد من تعطيل Confirm Email في مشروع Thunder-AI ثم أعد المحاولة بعد تحديث الصفحة.';
     }else if(code === 'email_address_not_authorized'){
-      $('authMsg').textContent = 'خدمة البريد الافتراضية في Supabase لا ترسل إلا لعناوين فريق المشروع. يلزم ربط SMTP مخصص حتى يتمكن الجميع من التسجيل.';
+      $('authMsg').textContent = 'إعداد تأكيد البريد ما زال مفعّلاً أو لم يُحفظ في مشروع Thunder-AI. عطّل Confirm Email ثم أعد المحاولة.';
     }else{
       $('authMsg').textContent = detail || 'حدث خطأ أثناء المصادقة.';
     }

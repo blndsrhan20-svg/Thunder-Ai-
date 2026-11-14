@@ -1,0 +1,204 @@
+-- Thunder Messenger v2: private group messaging
+-- Additive only: preserves all existing tables, users, conversations and messages.
+
+create table if not exists public.group_conversations (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(trim(title)) between 1 and 80),
+  description text not null default '' check (char_length(description) <= 300),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists group_conversations_updated_idx
+  on public.group_conversations(updated_at desc);
+
+create table if not exists public.group_members (
+  group_id uuid not null references public.group_conversations(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'member' check (role in ('owner','admin','member')),
+  joined_at timestamptz not null default now(),
+  primary key(group_id,user_id)
+);
+create index if not exists group_members_user_idx on public.group_members(user_id,joined_at desc);
+
+create table if not exists public.group_messages (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.group_conversations(id) on delete cascade,
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  content text not null default '' check (char_length(content) <= 4000),
+  image_path text,
+  created_at timestamptz not null default now(),
+  edited_at timestamptz,
+  deleted_at timestamptz,
+  constraint group_message_has_payload check (char_length(trim(content)) > 0 or image_path is not null)
+);
+create index if not exists group_messages_group_created_idx
+  on public.group_messages(group_id,created_at);
+
+create table if not exists public.group_message_reads (
+  message_id uuid not null references public.group_messages(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  read_at timestamptz not null default now(),
+  primary key(message_id,user_id)
+);
+create index if not exists group_message_reads_user_idx on public.group_message_reads(user_id,read_at desc);
+
+create table if not exists public.group_message_reactions (
+  message_id uuid not null references public.group_messages(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  emoji text not null check (emoji in ('👍','❤️','😂','😮','😢','🙏','🔥','🎉')),
+  created_at timestamptz not null default now(),
+  primary key(message_id,user_id,emoji)
+);
+
+alter table public.group_conversations enable row level security;
+alter table public.group_members enable row level security;
+alter table public.group_messages enable row level security;
+alter table public.group_message_reads enable row level security;
+alter table public.group_message_reactions enable row level security;
+
+grant select,insert,update,delete on public.group_conversations to authenticated;
+grant select,insert,update,delete on public.group_members to authenticated;
+grant select,insert,update,delete on public.group_messages to authenticated;
+grant select,insert on public.group_message_reads to authenticated;
+grant select,insert,delete on public.group_message_reactions to authenticated;
+
+drop policy if exists group_conversations_member_read on public.group_conversations;
+create policy group_conversations_member_read on public.group_conversations
+for select to authenticated using (exists (
+  select 1 from public.group_members gm
+  where gm.group_id=id and gm.user_id=(select auth.uid())
+));
+drop policy if exists group_conversations_owner_create on public.group_conversations;
+create policy group_conversations_owner_create on public.group_conversations
+for insert to authenticated with check (owner_id=(select auth.uid()));
+drop policy if exists group_conversations_admin_update on public.group_conversations;
+create policy group_conversations_admin_update on public.group_conversations
+for update to authenticated
+using (exists (select 1 from public.group_members gm where gm.group_id=id and gm.user_id=(select auth.uid()) and gm.role in ('owner','admin')))
+with check (exists (select 1 from public.group_members gm where gm.group_id=id and gm.user_id=(select auth.uid()) and gm.role in ('owner','admin')));
+drop policy if exists group_conversations_owner_delete on public.group_conversations;
+create policy group_conversations_owner_delete on public.group_conversations
+for delete to authenticated using (owner_id=(select auth.uid()));
+
+drop policy if exists group_members_member_read on public.group_members;
+create policy group_members_member_read on public.group_members
+for select to authenticated using (exists (
+  select 1 from public.group_members mine
+  where mine.group_id=group_id and mine.user_id=(select auth.uid())
+));
+drop policy if exists group_members_admin_add on public.group_members;
+create policy group_members_admin_add on public.group_members
+for insert to authenticated with check (exists (
+  select 1 from public.group_conversations g
+  where g.id=group_id and g.owner_id=(select auth.uid())
+) or exists (
+  select 1 from public.group_members mine
+  where mine.group_id=group_id and mine.user_id=(select auth.uid()) and mine.role in ('owner','admin')
+));
+drop policy if exists group_members_admin_or_self_remove on public.group_members;
+create policy group_members_admin_or_self_remove on public.group_members
+for delete to authenticated using (
+  (user_id=(select auth.uid()) and role <> 'owner')
+  or exists (select 1 from public.group_members mine where mine.group_id=group_id and mine.user_id=(select auth.uid()) and mine.role in ('owner','admin'))
+);
+drop policy if exists group_members_self_update on public.group_members;
+create policy group_members_self_update on public.group_members
+for update to authenticated using (user_id=(select auth.uid()))
+with check (user_id=(select auth.uid()));
+
+drop policy if exists group_messages_member_read on public.group_messages;
+create policy group_messages_member_read on public.group_messages
+for select to authenticated using (exists (
+  select 1 from public.group_members gm
+  where gm.group_id=group_id and gm.user_id=(select auth.uid())
+));
+drop policy if exists group_messages_member_send on public.group_messages;
+create policy group_messages_member_send on public.group_messages
+for insert to authenticated with check (
+  sender_id=(select auth.uid()) and exists (
+    select 1 from public.group_members gm
+    where gm.group_id=group_id and gm.user_id=(select auth.uid())
+  )
+);
+drop policy if exists group_messages_sender_edit on public.group_messages;
+create policy group_messages_sender_edit on public.group_messages
+for update to authenticated using (sender_id=(select auth.uid()))
+with check (sender_id=(select auth.uid()));
+drop policy if exists group_messages_sender_delete on public.group_messages;
+create policy group_messages_sender_delete on public.group_messages
+for delete to authenticated using (sender_id=(select auth.uid()));
+
+drop policy if exists group_message_reads_member_read on public.group_message_reads;
+create policy group_message_reads_member_read on public.group_message_reads
+for select to authenticated using (exists (
+  select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
+  where m.id=message_id and gm.user_id=(select auth.uid())
+));
+drop policy if exists group_message_reads_self_insert on public.group_message_reads;
+create policy group_message_reads_self_insert on public.group_message_reads
+for insert to authenticated with check (
+  user_id=(select auth.uid()) and exists (
+    select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
+    where m.id=message_id and gm.user_id=(select auth.uid())
+  )
+);
+
+drop policy if exists group_reactions_member_read on public.group_message_reactions;
+create policy group_reactions_member_read on public.group_message_reactions
+for select to authenticated using (exists (
+  select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
+  where m.id=message_id and gm.user_id=(select auth.uid())
+));
+drop policy if exists group_reactions_self_insert on public.group_message_reactions;
+create policy group_reactions_self_insert on public.group_message_reactions
+for insert to authenticated with check (
+  user_id=(select auth.uid()) and exists (
+    select 1 from public.group_messages m join public.group_members gm on gm.group_id=m.group_id
+    where m.id=message_id and gm.user_id=(select auth.uid())
+  )
+);
+drop policy if exists group_reactions_self_delete on public.group_message_reactions;
+create policy group_reactions_self_delete on public.group_message_reactions
+for delete to authenticated using (user_id=(select auth.uid()));
+
+-- Extend the existing private chat image bucket policies to cover group members.
+drop policy if exists thunder_chat_images_read_member on storage.objects;
+create policy thunder_chat_images_read_member on storage.objects
+for select to authenticated using (
+  bucket_id='thunder-chat-images' and (
+    (storage.foldername(name))[1]='community'
+    or exists(select 1 from public.direct_conversations c
+      where c.id::text=(storage.foldername(name))[1]
+      and (select auth.uid()) in (c.member_one,c.member_two))
+    or exists(select 1 from public.group_members gm
+      where gm.group_id::text=(storage.foldername(name))[1]
+      and gm.user_id=(select auth.uid()))
+  )
+);
+drop policy if exists thunder_chat_images_insert_member on storage.objects;
+create policy thunder_chat_images_insert_member on storage.objects
+for insert to authenticated with check (
+  bucket_id='thunder-chat-images' and (storage.foldername(name))[2]=(select auth.uid())::text
+  and (
+    ((storage.foldername(name))[1]='community')
+    or exists(select 1 from public.direct_conversations c
+      where c.id::text=(storage.foldername(name))[1]
+      and (select auth.uid()) in (c.member_one,c.member_two))
+    or exists(select 1 from public.group_members gm
+      where gm.group_id::text=(storage.foldername(name))[1]
+      and gm.user_id=(select auth.uid()))
+  )
+);
+
+do $$
+begin
+  if exists(select 1 from pg_publication where pubname='supabase_realtime') then
+    if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='group_messages') then
+      alter publication supabase_realtime add table public.group_messages;
+    end if;
+    if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='group_message_reactions') then
+      alter publication supabase_realtime add table public.group_message_reactions;
+    end if;
+  end if;
+end $$;

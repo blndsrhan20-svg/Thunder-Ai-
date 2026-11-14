@@ -19,7 +19,8 @@ export async function loadFeed(userId,limit=30){
  const profileMap=new Map((profiles.data||[]).map(p=>[p.id,p]));
  const followed=new Set((following.data||[]).map(x=>x.following_id));
  const signed=await Promise.all(rows.map(async p=>p.media_path?await mediaUrl(p.media_path):null));
- const authors=await Promise.all([...profileMap.values()].map(async p=>({...p,avatar_url:p.avatar_path?await mediaUrl(p.avatar_path):null})));const authorMap=new Map(authors.map(p=>[p.id,p]));\n return rows.map((p,i)=>({...p,author:authorMap.get(p.user_id)||{id:p.user_id,display_name:"عضو Thunder",username:""},liked_by_me:(likes.data||[]).some(x=>x.post_id===p.id&&x.user_id===userId),like_count:(likes.data||[]).filter(x=>x.post_id===p.id).length,comments:(comments.data||[]).filter(x=>x.post_id===p.id).slice(-3),comment_count:(comments.data||[]).filter(x=>x.post_id===p.id).length,following:followed.has(p.user_id),media_url:signed[i]}));
+ const authors=await Promise.all([...profileMap.values()].map(async p=>({...p,avatar_url:p.avatar_path?await mediaUrl(p.avatar_path):null})));const authorMap=new Map(authors.map(p=>[p.id,p]));
+ return rows.map((p,i)=>({...p,author:authorMap.get(p.user_id)||{id:p.user_id,display_name:"عضو Thunder",username:""},liked_by_me:(likes.data||[]).some(x=>x.post_id===p.id&&x.user_id===userId),like_count:(likes.data||[]).filter(x=>x.post_id===p.id).length,comments:(comments.data||[]).filter(x=>x.post_id===p.id).slice(-3),comment_count:(comments.data||[]).filter(x=>x.post_id===p.id).length,following:followed.has(p.user_id),media_url:signed[i]}));
 }
 export async function mediaUrl(path){const {data,error}=await supabase.storage.from("thunder-social-media").createSignedUrl(path,3600);if(error)throw error;return data.signedUrl}
 export async function createPost(userId,caption,file){
@@ -62,7 +63,8 @@ export async function loadStories(userId){
   supabase.from("story_views").select("story_id,viewer_id").in("story_id",storyIds).eq("viewer_id",userId)
  ]);
  if(profiles.error)throw profiles.error;if(views.error)throw views.error;
- const authors=await Promise.all((profiles.data||[]).map(async p=>({...p,avatar_url:p.avatar_path?await mediaUrl(p.avatar_path):null})));\n return Promise.all(rows.map(async s=>({...s,author:authors.find(p=>p.id===s.user_id)||{},viewed:(views.data||[]).some(v=>v.story_id===s.id),media_url:await mediaUrl(s.media_path)})));
+ const authors=await Promise.all((profiles.data||[]).map(async p=>({...p,avatar_url:p.avatar_path?await mediaUrl(p.avatar_path):null})));
+ return Promise.all(rows.map(async s=>({...s,author:authors.find(p=>p.id===s.user_id)||{},viewed:(views.data||[]).some(v=>v.story_id===s.id),media_url:await mediaUrl(s.media_path)})));
 }
 export async function createStory(userId,file,caption=""){
  if(!file||![...imageTypes,...videoTypes].includes(file.type))throw new Error("اختر صورة أو فيديو مدعوماً");
@@ -112,7 +114,8 @@ export async function loadPublicProfile(targetId,currentUserId){
  for(const r of [profile,posts,postCount,followers,following,relation])if(r.error)throw r.error;
  const rows=posts.data||[];
  const urls=await Promise.all(rows.map(p=>p.media_path?mediaUrl(p.media_path):null));
- const profileData={...profile.data,avatar_url:profile.data.avatar_path?await mediaUrl(profile.data.avatar_path):null};\n return {profile:profileData,posts:rows.map((p,i)=>({...p,media_url:urls[i]})),postCount:postCount.count||0,followers:followers.count||0,following:following.count||0,isFollowing:!!relation.data};
+ const profileData={...profile.data,avatar_url:profile.data.avatar_path?await mediaUrl(profile.data.avatar_path):null};
+ return {profile:profileData,posts:rows.map((p,i)=>({...p,media_url:urls[i]})),postCount:postCount.count||0,followers:followers.count||0,following:following.count||0,isFollowing:!!relation.data};
 }
 
 export async function uploadAvatar(userId,file){

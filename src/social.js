@@ -92,7 +92,7 @@ export async function loadProfileSummary(userId){
  return {profile:profile.data,posts:posts.count||0,followers:followers.count||0,following:following.count||0};
 }
 export async function loadNotifications(userId){
- const {data,error}=await supabase.from("notifications").select("id,actor_id,kind,post_id,story_id,is_read,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(40);
+ const {data,error}=await supabase.from("notifications").select("id,actor_id,kind,post_id,story_id,conversation_id,group_id,is_read,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(40);
  if(error)throw error;const rows=data||[];const ids=[...new Set(rows.map(n=>n.actor_id).filter(Boolean))];
  const profiles=ids.length?await supabase.from("profiles").select("id,username,display_name").in("id",ids):{data:[],error:null};
  if(profiles.error)throw profiles.error;

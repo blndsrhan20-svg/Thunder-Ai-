@@ -57,7 +57,7 @@ $("post-file").onchange=()=>{$("post-file-name").textContent=$("post-file").file
 $("story-file").onchange=publishStory;
 $("mobile-home").onclick=()=>showView("feed");
 $("mobile-search").onclick=newChat;
-$("mobile-create").onclick=()=>$("post-caption").focus();
+$("mobile-create").onclick=()=>{showView("feed");$("post-caption").focus()};
 $("mobile-messages").onclick=()=>showView("messages");
 $("mobile-profile").onclick=()=>$("profile-open").click();
 $("search-chats").oninput=renderList;

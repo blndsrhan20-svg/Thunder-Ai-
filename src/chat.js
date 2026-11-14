@@ -42,7 +42,7 @@ export async function createGroup(ownerId,title,description,memberIds){
  if(added.error){await supabase.from("group_conversations").delete().eq("id",made.data.id);throw added.error}
  return {...made.data,member_count:unique.length,last:null};
 }
-export const getGroupMessages=async id=>{const r=await supabase.from("group_messages").select("id,group_id,sender_id,content,image_path,created_at,edited_at,deleted_at").eq("group_id",id).order("created_at",{ascending:true}).limit(500);if(r.error)throw r.error;return r.data||[]};
+export const getGroupMessages=async id=>{const r=await supabase.from("group_messages").select("id,group_id,sender_id,content,image_path,created_at,edited_at,deleted_at").eq("group_id",id).order("created_at",{ascending:true}).limit(500);if(r.error)throw r.error;const ids=[...new Set((r.data||[]).map(m=>m.sender_id))];const p=ids.length?await supabase.from("profiles").select("id,username,display_name").in("id",ids):{data:[],error:null};if(p.error)throw p.error;return(r.data||[]).map(m=>({...m,sender:(p.data||[]).find(x=>x.id===m.sender_id)||null}))};
 export const sendGroupMessage=(groupId,senderId,content)=>supabase.from("group_messages").insert({group_id:groupId,sender_id:senderId,content}).select().single();
 export async function sendGroupImage(groupId,userId,file){
  if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error("الصيغ المدعومة: JPG وPNG وWEBP وGIF فقط");
@@ -68,3 +68,5 @@ export async function toggleGroupReaction(messageId,userId,emoji){
  const r=old.data?await supabase.from("group_message_reactions").delete().eq("message_id",messageId).eq("user_id",userId).eq("emoji",emoji):await supabase.from("group_message_reactions").insert({message_id:messageId,user_id:userId,emoji});
  if(r.error)throw r.error;
 }
+
+export const getGroupReactions=async ids=>{if(!ids.length)return[];const r=await supabase.from("group_message_reactions").select("message_id,user_id,emoji").in("message_id",ids);if(r.error)throw r.error;return r.data||[]};

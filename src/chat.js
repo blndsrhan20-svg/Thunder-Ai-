@@ -6,7 +6,7 @@ export async function findPeople(q,userId){const s=q.trim().replace(/[%,()]/g," 
 export async function openDirectConversation(userId,otherId){const [one,two]=[userId,otherId].sort();const old=await supabase.from("direct_conversations").select("id").eq("member_one",one).eq("member_two",two).maybeSingle();if(old.error)throw old.error;if(old.data)return old.data.id;const made=await supabase.from("direct_conversations").insert({member_one:one,member_two:two}).select("id").single();if(!made.error)return made.data.id;if(made.error.code==="23505"){const retry=await supabase.from("direct_conversations").select("id").eq("member_one",one).eq("member_two",two).single();if(retry.error)throw retry.error;return retry.data.id}throw made.error}
 export const watchMessages=(uid,fn,status)=>supabase.channel("thunder-user-"+uid).on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages"},e=>fn(e.new)).subscribe(status);
 export async function sendImage(conversationId,userId,file){
- if(!file.type.startsWith("image/"))throw new Error("يمكن إرسال الصور فقط حالياً");
+ if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error("الصيغ المدعومة: JPG وPNG وWEBP وGIF فقط");
  if(file.size>10*1024*1024)throw new Error("حجم الصورة يجب ألا يتجاوز 10 ميغابايت");
  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
  const path=conversationId+"/"+userId+"/"+crypto.randomUUID()+"."+ext;

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b111b"><title>Thunder Messenger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b111b;--panel:#111b28;--panel2:#182536;--panel3:#203148;--line:#2a3b50;--text:#f1f5fa;--muted:#91a1b5;--gold:#f2c542;--green:#43d39a;--danger:#ef7777}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}button,input{font:inherit;color:inherit}button{cursor:pointer;border:0}.app{height:100dvh;max-width:1550px;margin:auto;display:grid;grid-template-columns:360px minmax(0,1fr);background:#0e1723;border-inline:1px solid var(--line)}.sidebar{display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#121e2d,#101824);border-inline-end:1px solid var(--line)}.brand{height:78px;display:flex;align-items:center;gap:12px;padding:0 19px;border-bottom:1px solid var(--line)}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#ffe17a,#e2a91d);color:#17130a;display:grid;place-items:center;font-size:29px;font-weight:700;box-shadow:0 6px 22px #e8b72d30}.brand b{font-size:19px;letter-spacing:1px}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:-4px}.me{margin-inline-start:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.me .avatar{width:34px;height:34px;flex-basis:34px}.search-area{padding:15px 14px 9px}.search-wrap{position:relative}.search-wrap span{position:absolute;right:12px;top:8px;color:var(--muted);font-size:19px}.search{width:100%;padding:11px 38px 11px 12px;background:#0b131e;border:1px solid var(--line);border-radius:12px;outline:0;font-size:12px}.search:focus,.composer input:focus,.auth-card input:focus,.modal input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #f2c54214}.list-head{display:flex;justify-content:space-between;align-items:center;padding:8px 17px 10px}.list-head b{font-size:13px}.list-head button{background:#3b321a;color:var(--gold);padding:7px 10px;border-radius:9px;font-size:11px}.chat-list{overflow:auto;padding:0 8px 20px}.chat-item{width:100%;display:flex;align-items:center;gap:11px;padding:11px 9px;border:1px solid transparent;border-radius:13px;background:transparent;text-align:right}.chat-item:hover{background:#172536}.chat-item.active{background:linear-gradient(100deg,#1b2a3d,#182536);border-color:#2a4058}.avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#111a25;background:linear-gradient(145deg,#b6dcf6,#507da9);position:relative}.avatar.pink{background:linear-gradient(145deg,#f0b7c7,#9b5a77)}.avatar.green{background:linear-gradient(145deg,#b1e3c3,#4d9472)}.avatar.violet{background:linear-gradient(145deg,#d2b5fa,#795ba8)}.chat-meta{flex:1;min-width:0}.chat-top,.chat-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.chat-name{font-weight:600;font-size:13px}.chat-time,.chat-preview{font-size:10px;color:var(--muted)}.chat-preview{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.badge{min-width:18px;height:18px;padding:0 5px;border-radius:20px;background:var(--gold);color:#17130a;display:grid;place-items:center;font-size:10px;font-weight:700}.sidebar-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px}.sidebar-foot button{flex:1;background:var(--panel2);border-radius:10px;padding:9px;font-size:11px;color:var(--muted)}.main{display:flex;flex-direction:column;min-width:0;position:relative;background:radial-gradient(ellipse at 50% 0%,#1b2a3b 0,#111a27 50%,#0d1520 100%)}.welcome{margin:auto;text-align:center;color:var(--muted);max-width:390px;padding:28px}.welcome .logo{margin:0 auto 18px;width:66px;height:66px;font-size:44px;border-radius:20px}.welcome h2{color:var(--text);font-size:22px;margin:0 0 8px}.welcome p{font-size:12px;line-height:2}.conversation{height:100%;display:none;flex-direction:column}.conversation.show{display:flex}.header{height:78px;flex:0 0 78px;display:flex;align-items:center;gap:12px;padding:0 23px;border-bottom:1px solid var(--line);background:#111b28ed;backdrop-filter:blur(12px)}.person{flex:1;min-width:0}.person b{display:block;font-size:14px}.person small{color:var(--green);font-size:10px}.head-actions{display:flex;gap:7px}.icon-btn{width:38px;height:38px;border-radius:11px;background:var(--panel2);color:#aab8c9;font-size:17px}.icon-btn:hover{color:var(--gold);background:var(--panel3)}.mobile-back{display:none}.messages{flex:1;overflow:auto;padding:24px clamp(14px,5vw,70px);display:flex;flex-direction:column;gap:12px;background-image:radial-gradient(#9eb1c00b 1px,transparent 1px);background-size:22px 22px}.day{align-self:center;background:#172333;border:1px solid var(--line);color:var(--muted);border-radius:30px;padding:5px 13px;font-size:10px;margin:2px 0 10px}.bubble{max-width:min(76%,560px);padding:10px 14px;border-radius:16px;background:#1d2b3c;border:1px solid #2b3d52;font-size:13px;line-height:1.85;align-self:flex-start;border-bottom-right-radius:5px;overflow-wrap:anywhere}.bubble.mine{align-self:flex-end;background:linear-gradient(145deg,#59481e,#493a1a);border-color:#77602b;border-bottom-right-radius:16px;border-bottom-left-radius:5px}.bubble time{display:block;text-align:left;font-size:9px;color:#b8b5a7;margin-top:3px}.composer-wrap{padding:13px clamp(12px,4vw,42px) max(13px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#111b28}.composer{display:flex;align-items:center;gap:9px}.composer input{flex:1;min-width:0;background:#0b131e;border:1px solid #2a3b50;border-radius:14px;padding:13px 15px;outline:0;font-size:12px}.send{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#ffdc69,#e8b52e);color:#1a1508;font-size:20px;font-weight:700}.send:disabled{opacity:.55;cursor:wait}.hint{text-align:center;color:#738398;font-size:9px;margin-top:8px}.auth-layer{position:fixed;inset:0;z-index:20;background:#080d15ed;backdrop-filter:blur(15px);display:grid;place-items:center;padding:18px}.auth-card{width:min(430px,100%);background:linear-gradient(145deg,#172333,#101824);border:1px solid #f2c54255;border-radius:22px;padding:26px;box-shadow:0 25px 90px #0009}.auth-card .logo{margin:0 auto 14px}.auth-card h2{text-align:center;margin:0 0 5px}.auth-card p{text-align:center;color:var(--muted);font-size:12px;line-height:1.8;margin:0 0 18px}.auth-card label,.modal label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}.auth-card input,.modal input{width:100%;background:#0b131e;border:1px solid var(--line);border-radius:10px;padding:12px;outline:0;font-size:13px}.auth-actions{display:flex;gap:8px;margin-top:16px}.primary,.secondary{flex:1;padding:11px;border-radius:10px;font-size:12px}.primary{background:var(--gold);color:#17130a;font-weight:700}.secondary{background:var(--panel3);color:var(--text)}.auth-msg,.status{font-size:11px;line-height:1.8;color:var(--gold);min-height:22px;margin-top:10px}.modal-layer{position:fixed;inset:0;z-index:15;background:#0009;display:none;place-items:center;padding:16px}.modal-layer.open{display:grid}.modal{width:min(500px,100%);max-height:82dvh;overflow:auto;background:#142031;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 70px #0009}.modal h3{margin:0 0 8px;font-size:18px}.modal p{font-size:11px;color:var(--muted);line-height:1.8}.results{display:grid;gap:7px;margin-top:12px}.result{display:flex;align-items:center;gap:10px;background:#1a293b;border:1px solid transparent;border-radius:11px;padding:10px;text-align:right}.result:hover{border-color:var(--gold)}.result .avatar{width:38px;height:38px;flex-basis:38px}.result span{display:block;font-size:12px}.result small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.modal-actions{display:flex;gap:8px;margin-top:15px}.toast{position:fixed;z-index:30;bottom:20px;left:50%;transform:translateX(-50%);max-width:90vw;background:#26364a;border:1px solid #425875;color:var(--text);padding:10px 16px;border-radius:12px;font-size:12px;box-shadow:0 8px 30px #0008;display:none}.toast.show{display:block}.empty-list{text-align:center;color:var(--muted);font-size:11px;line-height:2;padding:28px 12px}.prototype-note{font-size:9px;color:#738398;text-align:center;margin-top:7px}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{border:0}.main{display:none}.app.chat-open .sidebar{display:none}.app.chat-open .main{display:flex}.brand{height:68px}.header{height:66px;flex-basis:66px;padding:0 11px}.mobile-back{display:inline-grid;place-items:center}.messages{padding:16px 12px}.bubble{max-width:88%}.head-actions .hide-mobile{display:none}.sidebar-foot{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+ <aside class="sidebar">
+  <div class="brand"><div class="logo">ϟ</div><div><b>THUNDER</b><small>MESSENGER</small></div><div class="me"><span id="myName">حسابي</span><div class="avatar violet" id="myAvatar">T</div></div></div>
+  <div class="search-area"><div class="search-wrap"><span>⌕</span><input class="search" id="chatSearch" placeholder="ابحث في محادثاتك..."></div></div>
+  <div class="list-head"><b>المحادثات</b><button id="newChatBtn">＋ محادثة جديدة</button></div>
+  <div class="chat-list" id="chatList"><div class="empty-list">سجّل الدخول لعرض محادثاتك.</div></div>
+  <div class="sidebar-foot"><button id="profileBtn">الملف الشخصي</button><button id="logoutBtn">تسجيل الخروج</button><button id="aiBtn">Thunder AI</button></div>
+ </aside>
+ <main class="main">
+  <div class="welcome" id="welcome"><div class="logo">ϟ</div><h2>Thunder Messenger</h2><p>مراسلاتك الخاصة في مكان واحد.<br>ابحث عن شخص وابدأ محادثة مباشرة.</p></div>
+  <section class="conversation" id="conversation">
+   <header class="header"><button class="icon-btn mobile-back" id="backBtn">→</button><div class="avatar" id="peerAvatar">T</div><div class="person"><b id="peerName">المحادثة</b><small id="peerHandle">Thunder Messenger</small></div><div class="head-actions"><button class="icon-btn hide-mobile" id="refreshBtn" title="تحديث المحادثة">↻</button></div></header>
+   <div class="messages" id="messages"><div class="day">بداية المحادثة</div></div>
+   <div class="composer-wrap"><form class="composer" id="messageForm"><input id="messageInput" maxlength="4000" autocomplete="off" placeholder="اكتب رسالة..." disabled><button class="send" id="sendBtn" type="submit" disabled>➤</button></form><div class="hint" id="connectionHint">رسائلك تُحفظ في قاعدة البيانات وتصل للطرف الآخر مباشرة عند اتصاله.</div></div>
+  </section>
+ </main>
+</div>
+<div class="auth-layer" id="authLayer"><div class="auth-card"><div class="logo">ϟ</div><h2 id="authTitle">تسجيل الدخول</h2><p id="authIntro">ادخل إلى حسابك للبدء بمراسلة أصدقائك.</p><form id="authForm"><label for="email">البريد الإلكتروني</label><input id="email" type="email" required autocomplete="email" placeholder="name@example.com" dir="ltr"><label for="password">كلمة المرور</label><input id="password" type="password" minlength="6" required autocomplete="current-password" placeholder="6 أحرف على الأقل" dir="ltr"><div class="auth-actions"><button class="primary" id="authSubmit" type="submit">دخول</button><button class="secondary" id="authToggle" type="button">إنشاء حساب</button></div></form><div class="auth-msg" id="authMsg" role="status"></div><div class="prototype-note">تسجيل آمن عبر Supabase Auth · لا يوجد دخول تلقائي بعد إنشاء الحساب</div></div></div>
+<div class="modal-layer" id="searchLayer"><div class="modal"><h3>ابدأ محادثة جديدة</h3><p>ابحث باسم المستخدم أو الاسم الظاهر أو رقم Thunder المكوّن من 8 أرقام.</p><input id="peopleSearch" placeholder="اكتب اسم المستخدم أو الرقم..." autocomplete="off"><div class="status" id="peopleStatus"></div><div class="results" id="peopleResults"></div><div class="modal-actions"><button class="secondary" id="closeSearch">إغلاق</button></div></div></div>
+<div class="modal-layer" id="profileLayer"><div class="modal"><h3>ملفي الشخصي</h3><p>أكمل بياناتك حتى يتمكن الآخرون من العثور عليك.</p><label for="displayName">الاسم الظاهر</label><input id="displayName" maxlength="40" placeholder="اسمك"><label for="username">اسم المستخدم</label><input id="username" maxlength="24" placeholder="username" dir="ltr"><p>3 إلى 24 حرفاً أو رقماً أو _ فقط. اسم المستخدم فريد.</p><div class="status" id="profileStatus"></div><div class="modal-actions"><button class="primary" id="saveProfile">حفظ الملف</button><button class="secondary" id="closeProfile">إغلاق</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+const SUPABASE_URL='https://qdadoqjecoztygckuckm.supabase.co';
+const SUPABASE_KEY='sb_publishable_is9fla7kfuUa00zjPrDk5w_P2vEAFAS';
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let user=null, profile=null, conversations=[], activeId=null, peer=null, channel=null, authMode='login', busy=false, searchTimer=null;
+const avatarColors=['','pink','green','violet'];
+function toast(message){$('toast').textContent=message;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2800)}
+function initials(name){return (name||'?').trim().slice(0,1).toUpperCase()||'?'}
+function fmtTime(value){if(!value)return '';return new Intl.DateTimeFormat('ar-IQ',{hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
+function safeText(value){return String(value??'')}
+function escapeLike(value){return value.replace(/[%,()]/g,' ').trim()}
+function setAuthMode(mode){authMode=mode;$('authTitle').textContent=mode==='login'?'تسجيل الدخول':'إنشاء حساب';$('authIntro').textContent=mode==='login'?'ادخل إلى حسابك للبدء بمراسلة أصدقائك.':'أنشئ حساباً بالبريد الإلكتروني وكلمة المرور.';$('authSubmit').textContent=mode==='login'?'دخول':'إنشاء الحساب';$('authToggle').textContent=mode==='login'?'إنشاء حساب':'لدي حساب بالفعل';$('authMsg').textContent=''}
+$('authToggle').addEventListener('click',()=>setAuthMode(authMode==='login'?'signup':'login'));
+$('authForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(busy)return;busy=true;$('authSubmit').disabled=true;$('authMsg').textContent='جارٍ التحقق...';
+ try{
+  const email=$('email').value.trim(),password=$('password').value;
+  if(authMode==='signup'){
+   const {data,error}=await supabase.auth.signUp({email,password});if(error)throw error;
+   if(data.session)await supabase.auth.signOut();
+   setAuthMode('login');
+   $('authMsg').textContent=data.session?'تم إنشاء الحساب. سجّل الدخول الآن بالبريد وكلمة المرور.':'تم إرسال طلب إنشاء الحساب. إذا كان تأكيد البريد مفعّلاً، أكّد بريدك ثم سجّل الدخول.';
+  }else{
+   const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
+   await enterAccount(data.session);
+  }
+ }catch(err){$('authMsg').textContent=err.message||'تعذر إكمال العملية.'}
+ finally{busy=false;$('authSubmit').disabled=false}
+});
+async function enterAccount(session){
+ user=session.user;$('authLayer').style.display='none';
+ const {data,error}=await supabase.from('profiles').select('id,username,display_name,user_code').eq('id',user.id).maybeSingle();
+ if(error)throw error;profile=data;
+ if(!profile){openProfile(true);renderUser();return}
+ renderUser();await loadConversations();subscribeRealtime();
+}
+function renderUser(){$('myName').textContent=profile?.display_name||profile?.username||'حسابي';$('myAvatar').textContent=initials(profile?.display_name||profile?.username||user?.email)}
+function openProfile(required=false){$('profileLayer').classList.add('open');$('displayName').value=profile?.display_name||'';$('username').value=profile?.username||'';$('profileStatus').textContent=required?'أكمل الملف الشخصي حتى تستخدم المراسلة.':'';$('closeProfile').style.display=required?'none':''}
+$('profileBtn').addEventListener('click',()=>openProfile(false));$('closeProfile').addEventListener('click',()=>$('profileLayer').classList.remove('open'));
+$('saveProfile').addEventListener('click',async()=>{
+ const display=$('displayName').value.trim(),username=$('username').value.trim().toLowerCase();
+ if(display.length<2){$('profileStatus').textContent='اكتب اسماً ظاهراً من حرفين على الأقل.';return}
+ if(!/^[a-z0-9_]{3,24}$/.test(username)){$('profileStatus').textContent='اسم المستخدم يجب أن يكون 3-24 حرفاً أو رقماً أو _. ';return}
+ $('saveProfile').disabled=true;$('profileStatus').textContent='جارٍ الحفظ...';
+ try{
+  const {data:existing,error:checkError}=await supabase.from('profiles').select('id').eq('username',username).maybeSingle();if(checkError)throw checkError;
+  if(existing&&existing.id!==user.id)throw new Error('اسم المستخدم مستخدم بالفعل.');
+  let result;
+  if(profile){result=await supabase.from('profiles').update({display_name:display,username}).eq('id',user.id).select('id,username,display_name,user_code').single()}
+  else{result=await supabase.from('profiles').insert({id:user.id,display_name:display,username}).select('id,username,display_name,user_code').single()}
+  if(result.error)throw result.error;profile=result.data;$('profileLayer').classList.remove('open');renderUser();await loadConversations();subscribeRealtime();toast('تم حفظ ملفك الشخصي.');
+ }catch(err){$('profileStatus').textContent=err.message||'تعذر حفظ الملف.'}
+ finally{$('saveProfile').disabled=false}
+});
+async function loadConversations(){
+ if(!user||!profile)return;
+ const uid=user.id;
+ const {data:rows,error}=await supabase.from('direct_conversations').select('id,member_one,member_two,last_message_at,created_at').or('member_one.eq.'+uid+',member_two.eq.'+uid).order('last_message_at',{ascending:false});
+ if(error)throw error;
+ const ids=(rows||[]).map(x=>x.member_one===uid?x.member_two:x.member_one);
+ let profiles=[];
+ if(ids.length){const unique=[...new Set(ids)];const r=await supabase.from('profiles').select('id,username,display_name,user_code').in('id',unique);if(r.error)throw r.error;profiles=r.data||[]}
+ let latest=[];
+ if(rows?.length){const r=await supabase.from('direct_messages').select('id,conversation_id,sender_id,content,created_at').in('conversation_id',rows.map(x=>x.id)).order('created_at',{ascending:false}).limit(250);if(r.error)throw r.error;latest=r.data||[]}
+ conversations=(rows||[]).map(c=>{const other=c.member_one===uid?c.member_two:c.member_one;return {...c,other:profiles.find(p=>p.id===other)||{id:other,display_name:'عضو Thunder',username:'',user_code:''},last:latest.find(m=>m.conversation_id===c.id)||null}}).sort((a,b)=>new Date(b.last_message_at)-new Date(a.last_message_at));
+ renderConversations();
+ if(activeId&&!conversations.some(c=>c.id===activeId)){activeId=null;peer=null;showWelcome()}
+}
+function renderConversations(){
+ const q=$('chatSearch').value.trim().toLowerCase();$('chatList').innerHTML='';
+ const list=conversations.filter(c=>(c.other.display_name||'').toLowerCase().includes(q)||(c.other.username||'').toLowerCase().includes(q)||(c.other.user_code||'').includes(q));
+ if(!list.length){$('chatList').innerHTML='<div class="empty-list">'+(conversations.length?'لا توجد نتائج مطابقة.':'لا توجد محادثات بعد.<br>ابدأ محادثة جديدة مع أحد المستخدمين.')+'</div>';return}
+ list.forEach(c=>{
+  const b=document.createElement('button');b.className='chat-item'+(c.id===activeId?' active':'');
+  const av=document.createElement('div');av.className='avatar '+avatarColors[conversations.indexOf(c)%avatarColors.length];av.textContent=initials(c.other.display_name||c.other.username);
+  const meta=document.createElement('div');meta.className='chat-meta';
+  const top=document.createElement('div');top.className='chat-top';const name=document.createElement('span');name.className='chat-name';name.textContent=c.other.display_name||c.other.username||'عضو Thunder';const time=document.createElement('span');time.className='chat-time';time.textContent=fmtTime(c.last?.created_at||c.last_message_at);top.append(name,time);
+  const bottom=document.createElement('div');bottom.className='chat-bottom';const preview=document.createElement('span');preview.className='chat-preview';preview.textContent=c.last?(c.last.sender_id===user.id?'أنت: ':'')+c.last.content:'ابدأ المحادثة';bottom.append(preview);meta.append(top,bottom);b.append(av,meta);b.addEventListener('click',()=>openConversation(c.id));$('chatList').append(b);
+ });
+}
+$('chatSearch').addEventListener('input',renderConversations);
+function showWelcome(){$('welcome').style.display='block';$('conversation').classList.remove('show');$('app').classList.remove('chat-open')}
+async function openConversation(id){
+ const c=conversations.find(x=>x.id===id);if(!c)return;activeId=id;peer=c.other;$('welcome').style.display='none';$('conversation').classList.add('show');$('app').classList.add('chat-open');$('peerName').textContent=peer.display_name||peer.username||'عضو Thunder';$('peerHandle').textContent=peer.username?'@'+peer.username+(peer.user_code?' · '+peer.user_code:''):'محادثة خاصة';$('peerAvatar').textContent=initials(peer.display_name||peer.username);$('messageInput').disabled=false;$('sendBtn').disabled=false;renderConversations();await loadMessages(id);
+}
+async function loadMessages(id){
+ $('messages').innerHTML='<div class="day">جارٍ تحميل الرسائل...</div>';
+ const {data,error}=await supabase.from('direct_messages').select('id,conversation_id,sender_id,content,created_at').eq('conversation_id',id).order('created_at',{ascending:true}).limit(500);
+ if(error){$('messages').innerHTML='<div class="day">تعذر تحميل الرسائل.</div>';toast(error.message);return}
+ renderMessages(data||[]);
+}
+function renderMessages(rows){
+ $('messages').innerHTML='<div class="day">بداية المحادثة</div>';
+ if(!rows.length){const d=document.createElement('div');d.className='day';d.textContent='أرسل أول رسالة لبدء الحديث.';$('messages').append(d);return}
+ rows.forEach(m=>{const b=document.createElement('div');b.className='bubble'+(m.sender_id===user.id?' mine':'');b.append(document.createTextNode(m.content));const t=document.createElement('time');t.textContent=fmtTime(m.created_at)+(m.sender_id===user.id?' · ✓✓':'');b.append(t);$('messages').append(b)});
+ $('messages').scrollTop=$('messages').scrollHeight;
+}
+$('messageForm').addEventListener('submit',async e=>{
+ e.preventDefault();const input=$('messageInput'),content=input.value.trim();if(!content||!activeId||busy)return;
+ busy=true;$('sendBtn').disabled=true;
+ try{const {error}=await supabase.from('direct_messages').insert({conversation_id:activeId,sender_id:user.id,content});if(error)throw error;input.value='';await loadMessages(activeId);await loadConversations()}
+ catch(err){toast('لم تُرسل الرسالة: '+(err.message||'خطأ غير معروف'))}
+ finally{busy=false;$('sendBtn').disabled=false;input.focus()}
+});
+async function subscribeRealtime(){
+ if(channel)await supabase.removeChannel(channel);
+ channel=supabase.channel('thunder-direct-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'direct_messages'},async payload=>{
+  const row=payload.new;if(!row)return;
+  await loadConversations().catch(()=>{});
+  if(row.conversation_id===activeId)await loadMessages(activeId);
+ }).subscribe(status=>{if(status==='SUBSCRIBED')$('connectionHint').textContent='متصل — الرسائل تُحفظ وتصل فورياً.';else if(status==='CHANNEL_ERROR')$('connectionHint').textContent='الاتصال الفوري غير متاح حالياً؛ يمكنك تحديث المحادثة.'});
+}
+$('refreshBtn').addEventListener('click',async()=>{if(activeId)await loadMessages(activeId);await loadConversations()});
+$('backBtn').addEventListener('click',()=>$('app').classList.remove('chat-open'));
+$('newChatBtn').addEventListener('click',()=>{$('searchLayer').classList.add('open');$('peopleSearch').value='';$('peopleResults').innerHTML='';$('peopleStatus').textContent='اكتب للبحث عن المستخدمين.';$('peopleSearch').focus()});
+$('closeSearch').addEventListener('click',()=>$('searchLayer').classList.remove('open'));
+$('peopleSearch').addEventListener('input',()=>{
+ clearTimeout(searchTimer);searchTimer=setTimeout(searchPeople,280);
+});
+async function searchPeople(){
+ const q=escapeLike($('peopleSearch').value.trim());$('peopleResults').innerHTML='';
+ if(q.length<2){$('peopleStatus').textContent='اكتب حرفين على الأقل.';return}
+ $('peopleStatus').textContent='جارٍ البحث...';
+ try{
+  let query=supabase.from('profiles').select('id,username,display_name,user_code').neq('id',user.id).limit(25);
+  if(/^\d{2,8}$/.test(q))query=query.ilike('user_code','%'+q+'%');
+  else query=query.or('username.ilike.%'+q+'%,display_name.ilike.%'+q+'%');
+  const {data,error}=await query;if(error)throw error;
+  $('peopleStatus').textContent=data.length?'اختر شخصاً لبدء محادثة.':'لم نعثر على مستخدم بهذا الاسم.';
+  data.forEach(p=>{
+   const b=document.createElement('button');b.className='result';const a=document.createElement('div');a.className='avatar';a.textContent=initials(p.display_name||p.username);const info=document.createElement('div');const n=document.createElement('span');n.textContent=p.display_name||p.username;const sub=document.createElement('small');sub.textContent='@'+p.username+' · '+(p.user_code||'');info.append(n,sub);b.append(a,info);b.addEventListener('click',()=>startConversation(p));$('peopleResults').append(b)
+  });
+ }catch(err){$('peopleStatus').textContent='تعذر البحث: '+err.message}
+}
+async function startConversation(target){
+ const [one,two]=[user.id,target.id].sort();$('peopleStatus').textContent='جارٍ فتح المحادثة...';
+ try{
+  let {data,error}=await supabase.from('direct_conversations').select('id,member_one,member_two,last_message_at,created_at').eq('member_one',one).eq('member_two',two).maybeSingle();
+  if(error)throw error;
+  if(!data){const ins=await supabase.from('direct_conversations').insert({member_one:one,member_two:two}).select('id,member_one,member_two,last_message_at,created_at').single();if(ins.error&&ins.error.code==='23505'){const retry=await supabase.from('direct_conversations').select('id,member_one,member_two,last_message_at,created_at').eq('member_one',one).eq('member_two',two).single();if(retry.error)throw retry.error;data=retry.data}else if(ins.error)throw ins.error;else data=ins.data}
+  $('searchLayer').classList.remove('open');await loadConversations();await openConversation(data.id);
+ }catch(err){$('peopleStatus').textContent='تعذر بدء المحادثة: '+err.message}
+}
+$('logoutBtn').addEventListener('click',async()=>{if(!confirm('تريد تسجيل الخروج؟'))return;if(channel)await supabase.removeChannel(channel);await supabase.auth.signOut();user=null;profile=null;conversations=[];activeId=null;showWelcome();$('chatList').innerHTML='<div class="empty-list">سجّل الدخول لعرض محادثاتك.</div>';$('authLayer').style.display='grid';setAuthMode('login')});
+$('aiBtn').addEventListener('click',()=>location.href='/ai');
+$('authLayer').style.display='grid';$('messageInput').disabled=true;
+</script>
+</body></html>

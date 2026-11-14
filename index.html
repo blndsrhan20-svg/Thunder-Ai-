@@ -43,6 +43,7 @@
    <button id="new-chat" class="icon-button new-chat-button" aria-label="رسالة جديدة" title="رسالة جديدة">＋</button>
   </header>
   <div class="search-box"><span>⌕</span><input id="search-chats" placeholder="ابحث عن محادثة أو شخص" autocomplete="off"></div>
+  <nav class="main-nav" aria-label="التنقل الرئيسي"><button id="nav-home" class="main-nav-item active">⌂ <span>الرئيسية</span></button><button id="nav-messages" class="main-nav-item">✉ <span>الرسائل</span></button><button id="nav-search" class="main-nav-item">⌕ <span>اكتشف</span></button><button id="nav-notifications" class="main-nav-item">♡ <span>النشاط</span></button></nav>
   <div class="list-heading"><h2>الرسائل</h2><span class="section-caption">INBOX</span></div>
   <nav class="tabs" aria-label="تصفية المحادثات">
    <button class="tab active" data-filter="all">الكل</button>
@@ -56,7 +57,14 @@
   </footer>
  </aside>
  <main class="workspace">
-  <section id="empty-workspace" class="empty-workspace">
+  <section id="social-screen" class="social-screen">
+   <header class="social-topbar"><a class="brand-lockup" href="#"><span class="brand-symbol">T</span><strong>thunder<span>.</span></strong></a><div class="social-top-actions"><button id="social-create-open" class="icon-button" aria-label="منشور جديد">＋</button><button id="social-notifications-open" class="icon-button" aria-label="الإشعارات">♡</button></div></header>
+   <div class="social-feed"><div class="stories-panel"><div class="feed-section-heading"><strong>القصص</strong><small>تختفي بعد 24 ساعة</small></div><div id="story-list" class="story-list"><button id="story-create" class="story-create"><span>＋</span><small>قصتك</small></button></div></div>
+    <form id="post-create-form" class="post-create-card"><div class="post-create-row"><span class="profile-dot">T</span><input id="post-caption" maxlength="2200" placeholder="بماذا تفكر؟ شارك لحظتك..."><button type="submit" class="button primary">نشر</button></div><div class="post-create-tools"><label for="post-file">＋ صورة أو فيديو</label><span>شارك لحظة مع مجتمعك</span><input id="post-file" type="file" accept="image/*,video/mp4,video/quicktime" hidden></div><div id="post-file-name" class="post-file-name"></div></form>
+    <div class="feed-section-heading feed-title"><strong>آخر المنشورات</strong><small>من مجتمع Thunder</small></div><div id="post-list" class="post-list"><div class="empty-state">جارٍ تحميل المنشورات...</div></div>
+   </div>
+  </section>
+  <section id="empty-workspace" class="empty-workspace hidden">
    <div class="welcome-mark">T</div>
    <p class="welcome-kicker">YOUR PEOPLE. YOUR SPACE.</p>
    <h1>كل تواصلك، <span>بأسلوبك.</span></h1>
@@ -82,6 +90,7 @@
   </section>
  </main>
 </div>
+<nav class="mobile-nav" aria-label="التنقل"><button id="mobile-home" class="active">⌂<small>الرئيسية</small></button><button id="mobile-search">⌕<small>اكتشف</small></button><button id="mobile-create">＋<small>نشر</small></button><button id="mobile-messages">✉<small>الرسائل</small></button><button id="mobile-profile">◉<small>حسابي</small></button></nav>
 <div id="dialog" class="dialog-backdrop hidden"><section class="dialog-card"><button id="dialog-close" class="dialog-close">×</button><div id="dialog-content"></div></section></div>
 <div id="toast" class="toast" role="status"></div>
 <script type="module" src="/src/app.js"></script>

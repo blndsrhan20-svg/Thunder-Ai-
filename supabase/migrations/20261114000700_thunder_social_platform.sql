@@ -244,3 +244,21 @@ revoke all on function public.thunder_notify_comment() from public,anon,authenti
 drop trigger if exists thunder_post_comment_notification on public.post_comments;
 create trigger thunder_post_comment_notification after insert on public.post_comments
 for each row execute function public.thunder_notify_comment();
+
+-- Match Messenger's permanent-account restriction: anonymous Auth sessions cannot use social features.
+do $$
+declare t text;
+begin
+  foreach t in array array['user_follows','posts','post_likes','post_comments','stories','story_views','notifications'] loop
+    execute format('drop policy if exists %I on public.%I',t||'_permanent_users_only',t);
+    execute format('create policy %I on public.%I as restrictive for all to authenticated using (((select auth.jwt()->>''is_anonymous''))::boolean is false) with check (((select auth.jwt()->>''is_anonymous''))::boolean is false)',t||'_permanent_users_only',t);
+  end loop;
+end $$;
+
+drop policy if exists thunder_social_media_permanent_users_only on storage.objects;
+create policy thunder_social_media_permanent_users_only on storage.objects as restrictive
+for all to authenticated using (
+  bucket_id <> 'thunder-social-media' or (((select auth.jwt()->>'is_anonymous'))::boolean is false)
+) with check (
+  bucket_id <> 'thunder-social-media' or (((select auth.jwt()->>'is_anonymous'))::boolean is false)
+);

@@ -153,7 +153,7 @@ begin
   update public.group_conversations set updated_at=now() where id=new.group_id;
   return new;
 end;
-$;
+$body$;
 revoke all on function public.touch_thunder_group_updated_at() from public,anon,authenticated;
 drop trigger if exists thunder_group_message_touch on public.group_messages;
 create trigger thunder_group_message_touch after insert on public.group_messages

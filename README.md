@@ -2,8 +2,23 @@
 
 A clean modular rebuild of the Messenger client.
 
-Implemented in this slice: Supabase email/password auth, profile lookup/edit, one-to-one chats using existing tables, realtime message refresh, private image sharing through the existing private Storage bucket, chat search, and responsive iPhone-first layout.
+## Implemented in this branch
+- Supabase email/password authentication with persistent sessions.
+- Profile lookup/edit and member search by username or Thunder ID.
+- One-to-one conversations, realtime private messages, and private image sharing.
+- Group creation, member selection, group messages, group image sharing, reaction toggles, and group read markers.
+- Responsive Arabic RTL interface designed for iPhone and desktop.
+- PWA manifest, icons, and conservative service worker that does not cache Supabase API traffic.
 
-Not yet implemented: group conversations, channels, voice/video calls, message reactions, editing/deletion, delivery/read receipts, push notifications, and attachment upload. Do not describe these as working yet.
+## Schema changes
+The new additive migration is `supabase/migrations/20261114000500_thunder_group_messaging.sql`. It adds group conversations, memberships, group messages, read markers, reactions, membership-aware RLS, and group-aware private image storage policies. It does not drop or rewrite existing tables.
 
-Existing Supabase data, tables, auth users, and migration history are intentionally preserved. No production migration or Railway deployment is performed by this branch. Verify auth/profile RLS, direct-message RLS, realtime, and two-account flows before release.
+**The migration has not been applied to the live Supabase project.** Group features will remain unavailable on the deployed site until the migration is reviewed and applied. No Railway deployment was performed.
+
+## Still planned / not yet implemented
+- Voice notes and non-image file attachments.
+- One-to-one and group audio/video calls (WebRTC signaling and TURN relay still need implementation and configuration).
+- Channels, message edit/delete UI, delivery/read indicators for direct messages, push notifications, blocking/reporting, and moderation tools.
+- End-to-end tests with two or more real accounts and iPhone Safari/PWA verification.
+
+Do not describe unimplemented or untested features as production-ready. Existing users, profiles, private conversations, messages, AI-related database tables, and existing migration history are intentionally preserved.

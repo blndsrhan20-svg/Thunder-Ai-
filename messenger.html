@@ -18,7 +18,7 @@
   <div class="search-area"><div class="search-wrap"><span>⌕</span><input class="search" id="chatSearch" placeholder="ابحث في محادثاتك..."></div></div>
   <div class="list-head"><b>المحادثات</b><button id="newChatBtn">＋ محادثة جديدة</button></div>
   <div class="chat-list" id="chatList"><div class="empty-list">سجّل الدخول لعرض محادثاتك.</div></div>
-  <div class="sidebar-foot"><button id="profileBtn">الملف الشخصي</button><button id="logoutBtn">تسجيل الخروج</button></div>
+  <div class="sidebar-foot"><button id="profileBtn">ملفي الشخصي</button><button id="settingsBtn">الإعدادات</button><button id="logoutBtn">خروج</button></div>
  </aside>
  <main class="main">
   <div class="welcome" id="welcome"><div class="logo">ϟ</div><h2>Thunder Messenger</h2><p>مراسلاتك الخاصة في مكان واحد.<br>ابحث عن شخص وابدأ محادثة مباشرة.</p></div>
@@ -32,6 +32,7 @@
 <div class="auth-layer" id="authLayer"><div class="auth-card"><div class="logo">ϟ</div><h2 id="authTitle">تسجيل الدخول</h2><p id="authIntro">ادخل إلى حسابك للبدء بمراسلة أصدقائك.</p><form id="authForm"><label for="email">البريد الإلكتروني</label><input id="email" type="email" required autocomplete="email" placeholder="name@example.com" dir="ltr"><label for="password">كلمة المرور</label><input id="password" type="password" minlength="6" required autocomplete="current-password" placeholder="6 أحرف على الأقل" dir="ltr"><div class="auth-actions"><button class="primary" id="authSubmit" type="submit">دخول</button><button class="secondary" id="authToggle" type="button">إنشاء حساب</button></div></form><div class="auth-msg" id="authMsg" role="status"></div><div class="prototype-note">تسجيل آمن عبر Supabase Auth · تسجيل دخول آمن</div></div></div>
 <div class="modal-layer" id="searchLayer"><div class="modal"><h3>ابدأ محادثة جديدة</h3><p>ابحث باسم المستخدم أو الاسم الظاهر أو رقم Thunder المكوّن من 8 أرقام.</p><input id="peopleSearch" placeholder="اكتب اسم المستخدم أو الرقم..." autocomplete="off"><div class="status" id="peopleStatus"></div><div class="results" id="peopleResults"></div><div class="modal-actions"><button class="secondary" id="closeSearch">إغلاق</button></div></div></div>
 <div class="modal-layer" id="profileLayer"><div class="modal"><h3>ملفي الشخصي</h3><p>أكمل بياناتك حتى يتمكن الآخرون من العثور عليك.</p><label for="displayName">الاسم الظاهر</label><input id="displayName" maxlength="40" placeholder="اسمك"><label for="username">اسم المستخدم</label><input id="username" maxlength="24" placeholder="username" dir="ltr"><p>3 إلى 24 حرفاً أو رقماً أو _ فقط. اسم المستخدم فريد.</p><div class="status" id="profileStatus"></div><div class="modal-actions"><button class="primary" id="saveProfile">حفظ الملف</button><button class="secondary" id="closeProfile">إغلاق</button></div></div></div>
+<div class="modal-layer" id="settingsLayer"><div class="modal"><h3>الإعدادات</h3><p>إعدادات حساب Thunder Messenger.</p><label>البريد الإلكتروني</label><input id="settingsEmail" readonly dir="ltr"><label>رقم Thunder</label><input id="settingsCode" readonly dir="ltr"><p>حسابك ورسائلك محفوظة في قاعدة بيانات Thunder. لا يمكن تغيير بيانات الدخول من هذه الشاشة.</p><div class="modal-actions"><button class="secondary" id="closeSettings">إغلاق</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
@@ -73,7 +74,7 @@ async function enterAccount(session){
 }
 function renderUser(){$('myName').textContent=profile?.display_name||profile?.username||'حسابي';$('myAvatar').textContent=initials(profile?.display_name||profile?.username||user?.email)}
 function openProfile(required=false){$('profileLayer').classList.add('open');$('displayName').value=profile?.display_name||'';$('username').value=profile?.username||'';$('profileStatus').textContent=required?'أكمل الملف الشخصي حتى تستخدم المراسلة.':'';$('closeProfile').style.display=required?'none':''}
-$('profileBtn').addEventListener('click',()=>openProfile(false));$('closeProfile').addEventListener('click',()=>$('profileLayer').classList.remove('open'));
+$('profileBtn').addEventListener('click',()=>openProfile(false));$('settingsBtn').addEventListener('click',()=>{$('settingsEmail').value=user?.email||'';$('settingsCode').value=profile?.user_code||'غير متوفر';$('settingsLayer').classList.add('open')});$('closeSettings').addEventListener('click',()=>$('settingsLayer').classList.remove('open'));$('closeProfile').addEventListener('click',()=>$('profileLayer').classList.remove('open'));
 $('saveProfile').addEventListener('click',async()=>{
  const display=$('displayName').value.trim(),username=$('username').value.trim().toLowerCase();
  if(display.length<2){$('profileStatus').textContent='اكتب اسماً ظاهراً من حرفين على الأقل.';return}

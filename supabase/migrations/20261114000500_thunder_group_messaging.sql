@@ -59,6 +59,13 @@ returns boolean language sql stable security definer set search_path=''
 as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_members gm where gm.group_id=p_group_id and gm.user_id=p_user_id and gm.role in ('owner','admin')) $;
 revoke all on function public.is_thunder_group_member(uuid,uuid) from public,anon;
 revoke all on function public.is_thunder_group_admin(uuid,uuid) from public,anon;
+create or replace function public.is_thunder_group_owner(p_group_id uuid,p_user_id uuid)
+returns boolean language sql stable security definer set search_path=''
+as $ select p_user_id=(select auth.uid()) and exists(select 1 from public.group_conversations g where g.id=p_group_id and g.owner_id=p_user_id) $;
+revoke all on function public.is_thunder_group_owner(uuid,uuid) from public,anon;
+grant execute on function public.is_thunder_group_owner(uuid,uuid) to authenticated;
+
+
 grant execute on function public.is_thunder_group_member(uuid,uuid) to authenticated;
 grant execute on function public.is_thunder_group_admin(uuid,uuid) to authenticated;
 
@@ -94,7 +101,7 @@ create policy group_members_member_read on public.group_members
 for select to authenticated using (public.is_thunder_group_member(group_members.group_id,(select auth.uid())));
 drop policy if exists group_members_admin_add on public.group_members;
 create policy group_members_admin_add on public.group_members
-for insert to authenticated with check (exists (select 1 from public.group_conversations g where g.id=group_members.group_id and g.owner_id=(select auth.uid())) or public.is_thunder_group_admin(group_members.group_id,(select auth.uid())));
+for insert to authenticated with check (public.is_thunder_group_owner(group_members.group_id,(select auth.uid())) or public.is_thunder_group_admin(group_members.group_id,(select auth.uid())));
 drop policy if exists group_members_admin_or_self_remove on public.group_members;
 create policy group_members_admin_or_self_remove on public.group_members
 for delete to authenticated using (
@@ -138,6 +145,19 @@ for insert to authenticated with check (
 drop policy if exists group_reactions_self_delete on public.group_message_reactions;
 create policy group_reactions_self_delete on public.group_message_reactions
 for delete to authenticated using (user_id=(select auth.uid()));
+
+create or replace function public.touch_thunder_group_updated_at()
+returns trigger language plpgsql security definer set search_path=''
+as $
+begin
+  update public.group_conversations set updated_at=now() where id=new.group_id;
+  return new;
+end;
+$;
+revoke all on function public.touch_thunder_group_updated_at() from public,anon,authenticated;
+drop trigger if exists thunder_group_message_touch on public.group_messages;
+create trigger thunder_group_message_touch after insert on public.group_messages
+for each row execute function public.touch_thunder_group_updated_at();
 
 -- Extend the existing private chat image bucket policies to cover group members.
 drop policy if exists thunder_chat_images_read_member on storage.objects;

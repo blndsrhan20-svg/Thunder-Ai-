@@ -1,6 +1,6 @@
 import {supabase} from "./supabase.js";
 import {signIn,signUp,signOut,getSession,loadProfile,saveProfile} from "./auth.js";
-import {listConversations,getMessages,sendMessage,findPeople,openDirectConversation,watchMessages,sendImage,signedImageUrl,listGroups,createGroup,getGroupMessages,sendGroupMessage,sendGroupImage,markGroupRead,toggleGroupReaction,getGroupReactions,sendVoiceMessage} from "./chat.js";
+import {listConversations,getMessages,sendMessage,findPeople,openDirectConversation,watchMessages,sendImage,signedImageUrl,listGroups,createGroup,getGroupMessages,sendGroupMessage,sendGroupImage,markGroupRead,toggleGroupReaction,getGroupReactions,sendVoiceMessage,getDirectReactions,toggleDirectReaction,markDirectRead,getDirectReadStatus} from "./chat.js";
 import {loadFeed,createPost,toggleLike,addComment,toggleFollow,loadStories,createStory,markStoryViewed,loadNotifications,loadProfileSummary} from "./social.js";
 const $=id=>document.getElementById(id);
 const state={user:null,profile:null,conversations:[],groups:[],active:null,activeType:"direct",peer:null,channel:null,mode:"login",filter:"all",busy:false,view:"feed",feed:[],stories:[]};
@@ -33,15 +33,15 @@ function renderList(){
 async function openChat(c,kind="direct"){showView("chat");state.active=c.id;state.activeType=kind;state.peer=kind==="direct"?c.other:null;$("empty-workspace").classList.add("hidden");$("chat-view").classList.remove("hidden");$("app").classList.add("chat-open");$("chat-name").textContent=kind==="group"?c.title:(c.other.display_name||c.other.username);$("chat-status").textContent=kind==="group"?(c.member_count+" أعضاء · مجموعة Thunder"):(c.other.username?"@"+c.other.username:"Thunder Messenger");$("chat-avatar").textContent=kind==="group"?"👥":initial(c.other.display_name||c.other.username);$("message-input").disabled=false;$("send").disabled=false;renderList();await showMessages(c.id,kind)}
 async function showMessages(id,kind=state.activeType){
  const rows=kind==="group"?await getGroupMessages(id):await getMessages(id);const host=$("message-list");host.replaceChildren();
- const reactions=kind==="group"?await getGroupReactions(rows.map(m=>m.id)):[];
+ const reactions=kind==="group"?await getGroupReactions(rows.map(m=>m.id)):await getDirectReactions(rows.map(m=>m.id));const reads=kind==="direct"?await getDirectReadStatus(rows.map(m=>m.id)):[];
  for(const m of rows){const b=document.createElement("article");b.className="message"+(m.sender_id===state.user.id?" mine":"");
  if(kind==="group"&&m.sender_id!==state.user.id){const who=document.createElement("small");who.className="message-sender";who.textContent=m.sender?.display_name||m.sender?.username||"عضو";b.append(who)}
  if(m.content)b.append(document.createTextNode(m.content));
  if(m.image_path){try{const img=document.createElement("img");img.className="message-image";img.alt="صورة مرسلة";img.src=await signedImageUrl(m.image_path);b.append(img)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل الصورة";b.append(unavailable)}}if(m.audio_path){try{const audio=document.createElement("audio");audio.className="message-audio";audio.controls=true;audio.preload="none";audio.src=await signedImageUrl(m.audio_path);b.append(audio)}catch(err){const unavailable=document.createElement("small");unavailable.textContent="تعذر تحميل التسجيل";b.append(unavailable)}}
  const t=document.createElement("time");t.textContent=fmt(m.created_at);b.append(t);
- if(kind==="group"){const bar=document.createElement("div");bar.className="reaction-bar";for(const emoji of ["👍","❤️","😂","😮","🙏"]){const users=reactions.filter(x=>x.message_id===m.id&&x.emoji===emoji);const btn=document.createElement("button");btn.type="button";btn.className="reaction"+(users.some(x=>x.user_id===state.user.id)?" selected":"");btn.textContent=emoji+(users.length?(" "+users.length):"");btn.onclick=async()=>{try{await toggleGroupReaction(m.id,state.user.id,emoji);await showMessages(id,kind)}catch(err){toast("تعذر إضافة التفاعل: "+err.message)}};bar.append(btn)}b.append(bar)}
+ const readMark=kind==="direct"&&m.sender_id===state.user.id&&reads.some(x=>x.message_id===m.id&&x.user_id!==state.user.id);if(readMark){const seen=document.createElement("small");seen.className="read-receipt";seen.textContent="✓✓ تمت القراءة";b.append(seen)}const bar=document.createElement("div");bar.className="reaction-bar";for(const emoji of ["👍","❤️","😂","😮","🙏"]){const users=reactions.filter(x=>x.message_id===m.id&&x.emoji===emoji);const btn=document.createElement("button");btn.type="button";btn.className="reaction"+(users.some(x=>x.user_id===state.user.id)?" selected":"");btn.textContent=emoji+(users.length?(" "+users.length):"");btn.onclick=async()=>{try{if(kind==="group")await toggleGroupReaction(m.id,state.user.id,emoji);else await toggleDirectReaction(m.id,state.user.id,emoji);await showMessages(id,kind)}catch(err){toast("تعذر إضافة التفاعل: "+err.message)}};bar.append(btn)}b.append(bar)
  host.append(b)}
- if(kind==="group")try{await markGroupRead(id,state.user.id)}catch(err){}
+ try{if(kind==="group")await markGroupRead(id,state.user.id);else await markDirectRead(id,state.user.id)}catch(err){console.warn("read receipt",err)}
  host.scrollTop=host.scrollHeight
 }
 

@@ -83,7 +83,7 @@ grant select,insert,delete on public.group_message_reactions to authenticated;
 
 drop policy if exists group_conversations_member_read on public.group_conversations;
 create policy group_conversations_member_read on public.group_conversations
-for select to authenticated using (public.is_thunder_group_member(id,(select auth.uid())));
+for select to authenticated using (owner_id=(select auth.uid()) or public.is_thunder_group_member(id,(select auth.uid())));
 drop policy if exists group_conversations_owner_create on public.group_conversations;
 create policy group_conversations_owner_create on public.group_conversations
 for insert to authenticated with check (owner_id=(select auth.uid()));

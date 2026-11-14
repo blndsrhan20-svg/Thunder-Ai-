@@ -161,7 +161,8 @@ drop policy if exists thunder_social_media_read on storage.objects;
 create policy thunder_social_media_read on storage.objects for select to authenticated
 using (bucket_id='thunder-social-media' and (
   exists(select 1 from public.posts p where p.media_path=name)
-  or exists(select 1 from public.stories s where s.media_path=name and s.expires_at>now())\n  or exists(select 1 from public.profiles p where p.avatar_path=name)
+  or exists(select 1 from public.stories s where s.media_path=name and s.expires_at>now())
+  or exists(select 1 from public.profiles p where p.avatar_path=name)
 ));
 drop policy if exists thunder_social_media_insert on storage.objects;
 create policy thunder_social_media_insert on storage.objects for insert to authenticated
